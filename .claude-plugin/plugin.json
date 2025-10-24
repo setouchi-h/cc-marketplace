@@ -1,26 +1,15 @@
 {
-  "name": "company-tools",
-  "owner": {
-    "name": "DevTools Team",
-    "email": "devtools@company.com"
+  "name": "pr-creator",
+  "version": "1.0.0",
+  "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests",
+  "author": {
+    "name": "setouchi-h",
+    "email": "setouchi.h.dev@gmail.com"
   },
-  "plugins": [
-    {
-      "name": "code-formatter",
-      "source": "./plugins/formatter",
-      "description": "保存時の自動コードフォーマット",
-      "version": "2.1.0",
-      "author": {
-        "name": "DevTools Team"
-      }
-    },
-    {
-      "name": "deployment-tools",
-      "source": {
-        "source": "github",
-        "repo": "company/deploy-plugin"
-      },
-      "description": "デプロイメント自動化ツール"
-    }
-  ]
+  "homepage": "https://github.com/setouchi-h/pr-tools",
+  "repository": "https://github.com/setouchi-h/pr-tools",
+  "license": "MIT",
+  "keywords": ["pr", "pull-request", "github", "git", "automation"],
+  "category": "productivity",
+  "commands": "./commands"
 }
