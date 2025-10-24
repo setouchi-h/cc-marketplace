@@ -15,6 +15,7 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 ## Prerequisites
 
 - [Claude Code](https://claude.ai/download) installed and running
+- `git` installed and available in `PATH`
 - [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
 - A git repository with changes to create a PR from
 
@@ -67,6 +68,20 @@ The plugin will:
 /create-pr --no-push
 ```
 
+### Flags
+
+- `-d, --draft`: Create as a draft PR
+- `-b, --base <branch>`: Use an alternate base branch. Defaults to the repository's default branch (commonly `main` or `master`).
+- `-r, --reviewer <user>`: Add a GitHub username as a reviewer. Repeat the flag to add multiple reviewers.
+- `--no-push`: Skip pushing the current branch before creating the PR.
+
+Examples with short flags:
+
+```bash
+# Draft PR against a custom base with two reviewers
+/create-pr -d -b develop -r alice -r bob
+```
+
 ## How It Works
 
 1. **Branch Analysis**: Checks your current branch status and remote tracking
@@ -81,6 +96,15 @@ The plugin will:
      - Additional notes
 4. **PR Creation**: Uses `gh pr create` to create the pull request
 5. **Result Display**: Shows the PR URL and summary
+
+### Permissions
+
+This plugin invokes the following local commands:
+
+- `git` — to inspect status, branches, commits, and diffs
+- `gh` — to create the pull request via GitHub CLI
+
+It relies on your existing `gh auth login` session and does not store credentials itself.
 
 ## Example PR Description
 
