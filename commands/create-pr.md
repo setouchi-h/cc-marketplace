@@ -1,3 +1,29 @@
+---
+name: create-pr
+description: Analyze local git changes and create a structured GitHub pull request.
+usage: /create-pr [--draft] [--base <branch>] [--reviewer <user> ...] [--no-push]
+arguments: []
+flags:
+  - name: --draft
+    alias: -d
+    type: boolean
+    description: Create the pull request as a draft.
+  - name: --base
+    alias: -b
+    type: string
+    description: Use an alternate base branch instead of the repository default.
+  - name: --reviewer
+    type: string
+    repeatable: true
+    description: Add a GitHub username as a reviewer. Provide the flag multiple times to add more than one reviewer.
+  - name: --no-push
+    type: boolean
+    description: Skip pushing the current branch before creating the pull request.
+permissions:
+  - command: git
+  - command: gh
+---
+
 # Create Pull Request
 
 You are an AI assistant specialized in creating well-structured pull requests. Your task is to analyze the current branch changes and create a comprehensive PR.

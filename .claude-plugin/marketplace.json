@@ -1,18 +1,19 @@
 {
+  "schema_version": 1,
   "name": "pr-tools",
   "owner": {
     "name": "Kazukuki Hashimoto",
     "email": "setouchi.develop@gmail.com"
   },
   "metadata": {
-    "description": "A marketplace for PR creation and management tools",
+    "description": "A marketplace bundle for PR creation and management tools.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "pr-creator",
-      "source": "./commands",
-      "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests",
+      "source": ".",
+      "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
       "version": "1.0.0",
       "author": {
         "name": "Kazukuki Hashimoto"
@@ -20,7 +21,13 @@
       "homepage": "https://github.com/setouchi-h/pr-tools",
       "repository": "https://github.com/setouchi-h/pr-tools",
       "license": "MIT",
-      "keywords": ["pr", "pull-request", "github", "git", "automation"],
+      "keywords": [
+        "pr",
+        "pull-request",
+        "github",
+        "git",
+        "automation"
+      ],
       "category": "productivity"
     }
   ]
