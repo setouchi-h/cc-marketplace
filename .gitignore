@@ -1,0 +1,80 @@
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.eslintcache
+.stylelintcache
+.cache/
+.turbo/
+
+# Build outputs
+dist/
+build/
+out/
+tmp/
+.tmp/
+
+# Framework outputs (optional, harmless if unused)
+.next/
+.nuxt/
+.svelte-kit/
+.vercel/
+.firebase/
+storybook-static/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+
+# Python (if any)
+__pycache__/
+*.py[cod]
+.python-version
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# Go (if any)
+bin/
+pkg/
+*.test
+
+# Rust (if any)
+target/
+
+# Java/Gradle (if any)
+.gradle/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
