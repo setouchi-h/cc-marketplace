@@ -41,6 +41,7 @@ git diff origin/main...HEAD 2>/dev/null || git diff origin/master...HEAD 2>/dev/
 Based on the analysis:
 
 1. **Determine the PR title**: Create a concise, descriptive title that summarizes the main purpose of the changes
+
    - Use imperative mood (e.g., "Add feature" not "Added feature")
    - Keep it under 72 characters
    - Examples: "Add user authentication", "Fix database connection issue", "Refactor API endpoints"
@@ -76,6 +77,7 @@ EOF
 ```
 
 Important notes:
+
 - Replace `PR_TITLE` with the generated title
 - Replace `PR_DESCRIPTION_HERE` with the full PR description
 - Use a HEREDOC to ensure proper formatting of the description
@@ -84,6 +86,7 @@ Important notes:
 ### 6. Handle the Result
 
 After creating the PR:
+
 - Display the PR URL to the user
 - Provide a summary of what was created
 - If there were any issues, explain them clearly and suggest next steps
@@ -92,27 +95,33 @@ After creating the PR:
 
 ```markdown
 ## Summary
+
 [Brief overview of the changes]
 
 ## Changes
+
 - [Key change 1]
 - [Key change 2]
 - [Key change 3]
 
 ## Motivation
+
 [Why these changes were needed]
 
 ## Testing
+
 - [How changes were tested]
 - [Test results or validation steps]
 
 ## Notes
+
 [Any additional context, breaking changes, or reviewer notes]
 ```
 
 ## Error Handling
 
 If any step fails:
+
 1. Explain what went wrong
 2. Provide the exact error message
 3. Suggest actionable solutions
@@ -121,6 +130,7 @@ If any step fails:
 ## Additional Options
 
 The user may provide additional arguments:
+
 - `-d, --draft`: Create as a draft PR
 - `-b, --base <branch>`: Specify the base branch
 - `-r, --reviewer <users>`: Add reviewers

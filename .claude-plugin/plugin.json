@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests",
   "author": {
-    "name": "setouchi-h",
-    "email": "setouchi.h.dev@gmail.com"
+    "name": "Kazukuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
   },
   "homepage": "https://github.com/setouchi-h/pr-tools",
   "repository": "https://github.com/setouchi-h/pr-tools",

@@ -1,8 +1,8 @@
 {
   "name": "pr-tools",
   "owner": {
-    "name": "setouchi-h",
-    "email": "setouchi.h.dev@gmail.com"
+    "name": "Kazukuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
   },
   "metadata": {
     "description": "A marketplace for PR creation and management tools",
@@ -11,12 +11,11 @@
   "plugins": [
     {
       "name": "pr-creator",
-      "source": ".",
+      "source": "./commands",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests",
       "version": "1.0.0",
       "author": {
-        "name": "setouchi-h",
-        "email": "setouchi.h.dev@gmail.com"
+        "name": "Kazukuki Hashimoto"
       },
       "homepage": "https://github.com/setouchi-h/pr-tools",
       "repository": "https://github.com/setouchi-h/pr-tools",
