@@ -66,6 +66,9 @@ The plugin will:
 
 # Skip automatic push (if branch is already pushed)
 /create-pr --no-push
+
+# Assign the PR to yourself when permitted
+/create-pr --assign-me
 ```
 
 ### Flags
@@ -74,6 +77,7 @@ The plugin will:
 - `-b, --base <branch>`: Use an alternate base branch. Defaults to the repository's default branch (commonly `main` or `master`).
 - `-r, --reviewer <user>`: Add a GitHub username as a reviewer. Repeat the flag to add multiple reviewers.
 - `--no-push`: Skip pushing the current branch before creating the PR.
+- `--assign-me`: Attempt to assign the PR to the authenticated user (`@me`). If assignment is not allowed for your role (e.g., external contributors), the tool will automatically retry without assignment so PR creation still succeeds.
 
 Examples with short flags:
 

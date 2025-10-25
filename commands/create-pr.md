@@ -1,7 +1,7 @@
 ---
 name: create-pr
 description: Analyze local git changes and create a structured GitHub pull request.
-usage: /create-pr [-d|--draft] [-b|--base <branch>] [-r|--reviewer <user> ...] [--no-push]
+usage: /create-pr [-d|--draft] [-b|--base <branch>] [-r|--reviewer <user> ...] [--no-push] [--assign-me]
 arguments: []
 flags:
   - name: --draft
@@ -20,6 +20,9 @@ flags:
   - name: --no-push
     type: boolean
     description: Skip pushing the current branch before creating the pull request.
+  - name: --assign-me
+    type: boolean
+    description: Attempt to assign the PR to the authenticated user (@me). If assignment is not allowed, creation proceeds without assignment.
 permissions:
   - command: git
   - command: gh
@@ -238,7 +241,8 @@ EOF
 # Build the gh pr create command with conditional flags (array-based for security)
 # Read title into a variable to avoid command substitution inside array initializer
 TITLE_CONTENT=$(<"$TITLE_FILE")
-GH_CMD=(gh pr create --base "$BASE_BRANCH" --title "$TITLE_CONTENT" --body-file "$BODY_FILE")
+GH_CMD_BASE=(gh pr create --base "$BASE_BRANCH" --title "$TITLE_CONTENT" --body-file "$BODY_FILE")
+GH_CMD=("${GH_CMD_BASE[@]}")
 
 # Add --draft flag if DRAFT_MODE is set
 if [ "${DRAFT_MODE:-false}" = "true" ]; then
@@ -258,8 +262,28 @@ if [ -n "${REVIEWERS:-}" ]; then
   done
 fi
 
-# Execute the command
-"${GH_CMD[@]}"
+# Optionally self-assign and retry safely if not permitted
+# Set ASSIGN_ME=true when --assign-me is provided
+if [ "${ASSIGN_ME:-false}" = "true" ]; then
+  GH_CMD+=(--assignee "@me")
+  ASSIGN_USED=true
+else
+  ASSIGN_USED=false
+fi
+
+# Execute with graceful fallback when assignment is not allowed
+if ! output=$("${GH_CMD[@]}" 2>&1); then
+  if [ "$ASSIGN_USED" = true ] && printf '%s' "$output" | grep -qiE 'assignee|assignees|validation failed|insufficient[[:space:]-]*permission|not permitted'; then
+    echo "Warning: Unable to self-assign (@me). Retrying without assignment..." >&2
+    if ! output2=$("${GH_CMD_BASE[@]}" 2>&1); then
+      printf '%s\n' "$output2" >&2
+      exit 1
+    fi
+  else
+    printf '%s\n' "$output" >&2
+    exit 1
+  fi
+fi
 ```
 
 Important notes:
@@ -271,6 +295,7 @@ Important notes:
 - The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`
 - Set `DRAFT_MODE=true` if the `--draft` flag is provided
 - Set `REVIEWERS` as a comma or space-separated list if `--reviewer` flags are provided (e.g., `REVIEWERS="user1 user2"` or `REVIEWERS="user1,user2"`)
+- Set `ASSIGN_ME=true` if the `--assign-me` flag is provided; the tool will try `--assignee @me` first and automatically retry without assignment if the repository does not allow you to assign issues.
 - If the default base branch cannot be detected via `origin/HEAD` or the GitHub API, the command fails with an error; pass `--base <branch>` or export `BASE_BRANCH` explicitly.
 
 ### 7. Handle the Result
@@ -325,5 +350,6 @@ The user may provide additional arguments:
 - `-b, --base <branch>`: Specify the base branch (required if default cannot be detected)
 - `-r, --reviewer <users>`: Add reviewers
 - `--no-push`: Skip pushing the branch (assume it's already pushed)
+- `--assign-me`: Attempt to assign the PR to yourself (@me). If not permitted, PR creation still succeeds without assignment.
 
 When these options are provided, incorporate them into the gh pr create command appropriately.
