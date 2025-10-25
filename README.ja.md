@@ -24,14 +24,14 @@ Claude Code用のインテリジェントなPR作成プラグインです。変�
 ### GitHubから（推奨）
 
 ```bash
-/plugin marketplace add setouchi-h/pr-tools
+/plugin marketplace add setouchi-h/git-tools
 /plugin install git-tools@git-tools
 ```
 
 ### ローカルディレクトリから
 
 ```bash
-cd /path/to/pr-tools
+cd /path/to/git-tools
 /plugin install .
 ```
 

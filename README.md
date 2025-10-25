@@ -24,14 +24,14 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 ### From GitHub (Recommended)
 
 ```bash
-/plugin marketplace add setouchi-h/pr-tools
+/plugin marketplace add setouchi-h/git-tools
 /plugin install git-tools@git-tools
 ```
 
 ### From Local Directory
 
 ```bash
-cd /path/to/pr-tools
+cd /path/to/git-tools
 /plugin install .
 ```
 
