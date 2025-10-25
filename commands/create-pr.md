@@ -61,25 +61,57 @@ echo "Current branch: $CURRENT_BRANCH"
 git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1 || echo "No upstream branch"
 
 # Determine the base branch
-# Priority: (1) --base flag exported as BASE_BRANCH, (2) origin/HEAD, (3) GitHub default_branch; otherwise fail and require explicit --base
+# Priority: (1) --base flag exported as BASE_BRANCH, (2) origin/HEAD, (3) git remote show, (4) GitHub default_branch; otherwise fail and require explicit --base
 # Note: If your tooling exports the --base flag differently, set BASE_BRANCH before running.
 if [ -z "${BASE_BRANCH:-}" ]; then
   DEFAULT_BRANCH=""
-  # Try local origin/HEAD ref (no network)
-  ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
-  if [ -n "$ref" ]; then
-    DEFAULT_BRANCH="${ref#origin/}"
+
+  # Ensure 'origin' exists before attempting origin-based detection
+  if git remote | grep -qx "origin"; then
+    # Try local origin/HEAD ref (no network)
+    ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+    if [ -n "$ref" ]; then
+      DEFAULT_BRANCH="${ref#origin/}"
+      echo "Detected default branch from origin/HEAD: $DEFAULT_BRANCH"
+    else
+      echo "Warning: origin/HEAD not set; trying 'git remote show -n origin'." >&2
+    fi
+
+    # Parse from `git remote show -n origin` if still empty (avoids network)
+    if [ -z "$DEFAULT_BRANCH" ]; then
+      head_branch=$(git remote show -n origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n1)
+      if [ -n "$head_branch" ]; then
+        DEFAULT_BRANCH="$head_branch"
+        echo "Detected default branch from 'git remote show -n origin': $DEFAULT_BRANCH"
+      else
+        echo "Warning: Could not parse HEAD branch from 'git remote show -n origin'." >&2
+      fi
+    fi
+  else
+    echo "Warning: remote 'origin' not found; skipping origin-based detection." >&2
   fi
-  # Parse from `git remote show origin` if still empty
-  if [ -z "$DEFAULT_BRANCH" ]; then
-    DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n1)
-  fi
+
   # Ask GitHub if gh is available and still unknown
-  if [ -z "$DEFAULT_BRANCH" ] && command -v gh >/dev/null 2>&1; then
-    DEFAULT_BRANCH=$(gh api repos/:owner/:repo --jq .default_branch 2>/dev/null || true)
-  fi
   if [ -z "$DEFAULT_BRANCH" ]; then
-    die "Could not determine the repository's default branch. Pass --base <branch> or export BASE_BRANCH."
+    if command -v gh >/dev/null 2>&1; then
+      if gh auth status >/dev/null 2>&1; then
+        DEFAULT_BRANCH=$(gh api repos/:owner/:repo --jq .default_branch 2>/dev/null || true)
+        if [ -n "$DEFAULT_BRANCH" ]; then
+          echo "Detected default branch from GitHub API: $DEFAULT_BRANCH"
+        else
+          echo "Warning: GitHub API did not return default_branch; check repo access or connectivity." >&2
+        fi
+      else
+        echo "Warning: 'gh' CLI not authenticated; skipping GitHub API lookup." >&2
+      fi
+    else
+      echo "Warning: 'gh' CLI not installed; skipping GitHub API lookup." >&2
+    fi
+  fi
+
+  # Final validation and guidance
+  if [ -z "$DEFAULT_BRANCH" ]; then
+    die "Could not determine the repository's default branch. Pass --base <branch> or export BASE_BRANCH. Hints: ensure remote 'origin' exists, set its HEAD via 'git remote set-head origin -a', and/or authenticate GitHub CLI with 'gh auth login'."
   fi
   BASE_BRANCH="$DEFAULT_BRANCH"
 fi
@@ -206,7 +238,9 @@ PR_DESCRIPTION_HERE
 EOF
 
 # Build the gh pr create command with conditional flags (array-based for security)
-GH_CMD=(gh pr create --base "${BASE_BRANCH}" --title "$(cat "$TITLE_FILE")" --body-file "$BODY_FILE")
+# Read title into a variable to avoid command substitution inside array initializer
+TITLE_CONTENT=$(<"$TITLE_FILE")
+GH_CMD=(gh pr create --base "$BASE_BRANCH" --title "$TITLE_CONTENT" --body-file "$BODY_FILE")
 
 # Add --draft flag if DRAFT_MODE is set
 if [ "${DRAFT_MODE:-false}" = "true" ]; then
@@ -215,8 +249,11 @@ fi
 
 # Add reviewers if REVIEWERS is set (comma or space-separated list)
 if [ -n "${REVIEWERS:-}" ]; then
-  for reviewer in ${REVIEWERS//,/ }; do
-    reviewer=$(echo "$reviewer" | xargs)  # Trim whitespace
+  reviewers_str=${REVIEWERS//,/ }            # Normalize commas to spaces
+  # Split safely into an array without globbing/word-splitting of the expansion
+  read -r -a _reviewers <<< "$reviewers_str"
+  for reviewer in "${_reviewers[@]}"; do
+    reviewer=$(printf '%s' "$reviewer" | xargs)  # Trim whitespace
     if [ -n "$reviewer" ]; then
       GH_CMD+=(--reviewer "$reviewer")
     fi
