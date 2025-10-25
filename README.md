@@ -25,7 +25,7 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 
 ```bash
 /plugin marketplace add setouchi-h/git-tools
-/plugin install git-tools@git-tools
+/plugin install gh@git-tools
 ```
 
 ### From Local Directory
@@ -42,7 +42,7 @@ cd /path/to/git-tools
 Simply run the command in Claude Code:
 
 ```bash
-/git-tools:create-pr
+/gh:create-pr
 ```
 
 The plugin will:
@@ -140,7 +140,7 @@ Any additional context, breaking changes, or reviewer notes
 
 If the `/create-pr` command is not recognized:
 1. Verify the plugin is installed: `/plugin list`
-2. Reinstall if needed: `/plugin install git-tools@git-tools`
+2. Reinstall if needed: `/plugin install gh@git-tools`
 3. Restart Claude Code
 
 ### GitHub CLI Not Found

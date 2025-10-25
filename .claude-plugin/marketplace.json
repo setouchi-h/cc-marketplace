@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "git-tools",
+      "name": "gh",
       "source": "./",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
       "version": "1.0.0",
