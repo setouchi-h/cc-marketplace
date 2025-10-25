@@ -1,7 +1,7 @@
 ---
 name: create-pr
 description: Analyze local git changes and create a structured GitHub pull request.
-usage: /create-pr [--draft] [--base <branch>] [--reviewer <user> ...] [--no-push]
+usage: /create-pr [-d|--draft] [-b|--base <branch>] [-r|--reviewer <user> ...] [--no-push]
 arguments: []
 flags:
   - name: --draft
@@ -13,6 +13,7 @@ flags:
     type: string
     description: Use an alternate base branch instead of the repository default.
   - name: --reviewer
+    alias: -r
     type: string
     repeatable: true
     description: Add a GitHub username as a reviewer. Provide the flag multiple times to add more than one reviewer.
@@ -46,11 +47,33 @@ git branch --show-current
 # Check if the branch has a remote tracking branch
 git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "No upstream branch"
 
+# Determine the base branch
+# Priority: (1) --base flag exported as BASE_BRANCH, (2) origin/HEAD, (3) GitHub default_branch, (4) fallback to main
+# Note: If your tooling exports the --base flag differently, set BASE_BRANCH before running.
+if [ -z "${BASE_BRANCH:-}" ]; then
+  DEFAULT_BRANCH=""
+  # Try local origin/HEAD ref (no network)
+  ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+  if [ -n "$ref" ]; then
+    DEFAULT_BRANCH="${ref#origin/}"
+  fi
+  # Parse from `git remote show origin` if still empty
+  if [ -z "$DEFAULT_BRANCH" ]; then
+    DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n1)
+  fi
+  # Ask GitHub if gh is available and still unknown
+  if [ -z "$DEFAULT_BRANCH" ] && command -v gh >/dev/null 2>&1; then
+    DEFAULT_BRANCH=$(gh api repos/:owner/:repo --jq .default_branch 2>/dev/null || true)
+  fi
+  BASE_BRANCH=${DEFAULT_BRANCH:-main}
+fi
+echo "Using base branch: ${BASE_BRANCH}"
+
 # Get recent commits on this branch (not in main/master)
-git log --oneline --no-merges origin/main..HEAD 2>/dev/null || git log --oneline --no-merges origin/master..HEAD 2>/dev/null || git log --oneline -10
+git log --oneline --no-merges "origin/${BASE_BRANCH}"..HEAD 2>/dev/null || git log --oneline -10
 
 # Get the diff summary
-git diff --stat origin/main...HEAD 2>/dev/null || git diff --stat origin/master...HEAD 2>/dev/null || git diff --stat HEAD~5..HEAD
+git diff --stat "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff --stat HEAD~5..HEAD
 ```
 
 ### 2. Analyze Changes in Detail
@@ -59,7 +82,7 @@ Get a detailed view of the changes:
 
 ```bash
 # Get the detailed diff
-git diff origin/main...HEAD 2>/dev/null || git diff origin/master...HEAD 2>/dev/null || git diff HEAD~5..HEAD
+git diff "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff HEAD~5..HEAD
 ```
 
 ### 3. Generate PR Content
@@ -81,22 +104,36 @@ Based on the analysis:
 
 ### 4. Ensure Branch is Pushed
 
-Before creating the PR:
+Before creating the PR, make sure your branch is on the remote. Skip this step entirely if `--no-push` was provided.
 
 ```bash
-# Push the current branch if not already pushed
-CURRENT_BRANCH=$(git branch --show-current)
-git push -u origin "$CURRENT_BRANCH"
+# Skip if --no-push was provided (set NO_PUSH=true in scripts)
+if [ "${NO_PUSH:-false}" = "true" ]; then
+  echo "Skipping push due to --no-push."
+else
+  CURRENT_BRANCH=$(git branch --show-current)
+  # If no upstream is set, push and set upstream
+  if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+    git push -u origin "$CURRENT_BRANCH"
+  else
+    # If local branch is ahead, push; otherwise do nothing
+    if [ -n "$(git log --oneline @{u}..HEAD)" ]; then
+      git push
+    else
+      echo "No new commits to push."
+    fi
+  fi
+fi
 ```
 
-If the push fails, report the error to the user and ask them to resolve any conflicts or issues.
+If the push fails, report the error and ask the user to resolve conflicts or authentication issues. If `--no-push` was used but no upstream exists, clearly surface that the PR cannot be created until the branch is available on the remote (push manually or rerun without `--no-push`).
 
 ### 5. Create the Pull Request
 
 Use the GitHub CLI to create the PR:
 
 ```bash
-gh pr create --title "PR_TITLE" --body "$(cat <<'EOF'
+gh pr create --base "${BASE_BRANCH}" --title "PR_TITLE" --body "$(cat <<'EOF'
 PR_DESCRIPTION_HERE
 EOF
 )"
@@ -107,7 +144,7 @@ Important notes:
 - Replace `PR_TITLE` with the generated title
 - Replace `PR_DESCRIPTION_HERE` with the full PR description
 - Use a HEREDOC to ensure proper formatting of the description
-- The PR will be created against the default branch (usually main or master)
+- The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`.
 
 ### 6. Handle the Result
 
