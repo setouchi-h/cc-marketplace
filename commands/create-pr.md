@@ -11,7 +11,7 @@ flags:
   - name: --base
     alias: -b
     type: string
-    description: Use an alternate base branch instead of the repository default.
+    description: Specify the base branch; required if default cannot be detected.
   - name: --reviewer
     alias: -r
     type: string
@@ -38,17 +38,30 @@ Follow these steps carefully:
 First, gather information about the current branch and changes:
 
 ```bash
-# Check current branch and status
-git status
+# --- Preflight & graceful error handling ---
+die() { echo "Error: $*" >&2; exit 1; }
+
+# Ensure git is available
+command -v git >/dev/null 2>&1 || die "git is not installed or not in PATH."
+
+# Ensure we are inside a git repository
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "This command must be run inside a Git repository."
+
+# Check current branch and status (fail clearly if either breaks)
+if ! git status >/dev/null 2>&1; then
+  die "Failed to run 'git status'. Is the repo in a valid state?"
+fi
 
 # Get the current branch name
-git branch --show-current
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || true)
+[ -n "$CURRENT_BRANCH" ] || die "Could not determine the current branch. Create/checkout a branch and try again."
+echo "Current branch: $CURRENT_BRANCH"
 
 # Check if the branch has a remote tracking branch
-git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "No upstream branch"
+git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1 || echo "No upstream branch"
 
 # Determine the base branch
-# Priority: (1) --base flag exported as BASE_BRANCH, (2) origin/HEAD, (3) GitHub default_branch, (4) fallback to main
+# Priority: (1) --base flag exported as BASE_BRANCH, (2) origin/HEAD, (3) GitHub default_branch; otherwise fail and require explicit --base
 # Note: If your tooling exports the --base flag differently, set BASE_BRANCH before running.
 if [ -z "${BASE_BRANCH:-}" ]; then
   DEFAULT_BRANCH=""
@@ -65,15 +78,18 @@ if [ -z "${BASE_BRANCH:-}" ]; then
   if [ -z "$DEFAULT_BRANCH" ] && command -v gh >/dev/null 2>&1; then
     DEFAULT_BRANCH=$(gh api repos/:owner/:repo --jq .default_branch 2>/dev/null || true)
   fi
-  BASE_BRANCH=${DEFAULT_BRANCH:-main}
+  if [ -z "$DEFAULT_BRANCH" ]; then
+    die "Could not determine the repository's default branch. Pass --base <branch> or export BASE_BRANCH."
+  fi
+  BASE_BRANCH="$DEFAULT_BRANCH"
 fi
 echo "Using base branch: ${BASE_BRANCH}"
 
-# Get recent commits on this branch (not in main/master)
+# Get recent commits on this branch (not in base branch)
 git log --oneline --no-merges "origin/${BASE_BRANCH}"..HEAD 2>/dev/null || git log --oneline -10
 
 # Get the diff summary
-git diff --stat "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff --stat HEAD~5..HEAD
+git diff --stat "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff --stat HEAD~5...HEAD
 ```
 
 ### 2. Analyze Changes in Detail
@@ -82,7 +98,7 @@ Get a detailed view of the changes:
 
 ```bash
 # Get the detailed diff
-git diff "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff HEAD~5..HEAD
+git diff "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff HEAD~5...HEAD
 ```
 
 ### 3. Check for Sensitive Data
@@ -145,16 +161,22 @@ Before creating the PR, make sure your branch is on the remote. Skip this step e
 if [ "${NO_PUSH:-false}" = "true" ]; then
   echo "Skipping push due to --no-push."
 else
-  CURRENT_BRANCH=$(git branch --show-current)
+  die() { echo "Error: $*" >&2; exit 1; }
+  # Ensure we're in a git repo (user may call this step independently)
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Not a Git repository; cannot push."
+
+  CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || true)
+  [ -n "$CURRENT_BRANCH" ] || die "Could not determine the current branch; create/checkout a branch and try again."
+
   # If no upstream is set, push and set upstream
   if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
-    git push -u origin "$CURRENT_BRANCH"
+    if ! git push -u origin "$CURRENT_BRANCH"; then
+      die "Failed to push and set upstream. Check your remote 'origin', auth, and branch permissions."
+    fi
   else
-    # If local branch is ahead, push; otherwise do nothing
-    if [ -n "$(git log --oneline @{u}..HEAD)" ]; then
-      git push
-    else
-      echo "No new commits to push."
+    # Upstream exists; rely on git to be no-op if nothing to push
+    if ! git push; then
+      die "Failed to push to upstream. Resolve conflicts or authentication issues and retry."
     fi
   fi
 fi
@@ -183,8 +205,23 @@ cat > "$BODY_FILE" <<'EOF'
 PR_DESCRIPTION_HERE
 EOF
 
-# Create the PR using the temporary files
-gh pr create --base "${BASE_BRANCH}" --title "$(cat "$TITLE_FILE")" --body-file "$BODY_FILE"
+# Build the gh pr create command with conditional flags
+GH_CMD="gh pr create --base \"${BASE_BRANCH}\" --title \"\$(cat \"$TITLE_FILE\")\" --body-file \"$BODY_FILE\""
+
+# Add --draft flag if DRAFT_MODE is set
+if [ "${DRAFT_MODE:-false}" = "true" ]; then
+  GH_CMD="$GH_CMD --draft"
+fi
+
+# Add reviewers if REVIEWERS is set (comma or space-separated list)
+if [ -n "${REVIEWERS:-}" ]; then
+  for reviewer in ${REVIEWERS//,/ }; do
+    GH_CMD="$GH_CMD --reviewer \"$reviewer\""
+  done
+fi
+
+# Execute the command
+eval "$GH_CMD"
 ```
 
 Important notes:
@@ -193,7 +230,10 @@ Important notes:
 - Replace `PR_DESCRIPTION_HERE` with the full PR description
 - Temporary files are used to prevent command injection vulnerabilities from commit messages
 - The `trap` command ensures temporary files are cleaned up even if the command fails
-- The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`.
+- The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`
+- Set `DRAFT_MODE=true` if the `--draft` flag is provided
+- Set `REVIEWERS` as a comma or space-separated list if `--reviewer` flags are provided (e.g., `REVIEWERS="user1 user2"` or `REVIEWERS="user1,user2"`)
+- If the default base branch cannot be detected via `origin/HEAD` or the GitHub API, the command fails with an error; pass `--base <branch>` or export `BASE_BRANCH` explicitly.
 
 ### 7. Handle the Result
 
@@ -244,7 +284,7 @@ If any step fails:
 The user may provide additional arguments:
 
 - `-d, --draft`: Create as a draft PR
-- `-b, --base <branch>`: Specify the base branch
+- `-b, --base <branch>`: Specify the base branch (required if default cannot be detected)
 - `-r, --reviewer <users>`: Add reviewers
 - `--no-push`: Skip pushing the branch (assume it's already pushed)
 
