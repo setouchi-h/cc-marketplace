@@ -21,7 +21,6 @@
       "homepage": "https://github.com/setouchi-h/pr-tools",
       "repository": "https://github.com/setouchi-h/pr-tools",
       "license": "MIT",
-      "icon": "./.claude-plugin/icon.svg",
       "keywords": [
         "pr",
         "pull-request",
