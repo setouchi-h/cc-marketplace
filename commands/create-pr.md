@@ -68,23 +68,21 @@ if [ -z "${BASE_BRANCH:-}" ]; then
 
   # Ensure 'origin' exists before attempting origin-based detection
   if git remote | grep -qx "origin"; then
-    # Try local origin/HEAD ref (no network)
-    ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
-    if [ -n "$ref" ]; then
-      DEFAULT_BRANCH="${ref#origin/}"
-      echo "Detected default branch from origin/HEAD: $DEFAULT_BRANCH"
+    # Use git ls-remote to get the actual remote HEAD (requires network but always accurate)
+    head_ref=$(git ls-remote --symref origin HEAD 2>/dev/null | sed -n 's|^ref: refs/heads/\(.*\)\tHEAD$|\1|p' | head -n1)
+    if [ -n "$head_ref" ]; then
+      DEFAULT_BRANCH="$head_ref"
+      echo "Detected default branch from remote: $DEFAULT_BRANCH"
     else
-      echo "Warning: origin/HEAD not set; trying 'git remote show -n origin'." >&2
-    fi
+      echo "Warning: Could not detect default branch from 'git ls-remote'." >&2
 
-    # Parse from `git remote show -n origin` if still empty (avoids network)
-    if [ -z "$DEFAULT_BRANCH" ]; then
-      head_branch=$(git remote show -n origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n1)
-      if [ -n "$head_branch" ]; then
-        DEFAULT_BRANCH="$head_branch"
-        echo "Detected default branch from 'git remote show -n origin': $DEFAULT_BRANCH"
+      # Fallback: Try local origin/HEAD ref (no network)
+      ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+      if [ -n "$ref" ]; then
+        DEFAULT_BRANCH="${ref#origin/}"
+        echo "Detected default branch from local origin/HEAD: $DEFAULT_BRANCH"
       else
-        echo "Warning: Could not parse HEAD branch from 'git remote show -n origin'." >&2
+        echo "Warning: origin/HEAD not set locally." >&2
       fi
     fi
   else
