@@ -85,7 +85,41 @@ Get a detailed view of the changes:
 git diff "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff HEAD~5..HEAD
 ```
 
-### 3. Generate PR Content
+### 3. Check for Sensitive Data
+
+**IMPORTANT**: Before creating the PR, analyze the diff for potential secrets or sensitive data.
+
+Check for common secret patterns in the changes:
+
+- **API Keys**: AWS keys (AKIA*, AWS_*), Google API keys, Azure keys, etc.
+- **Tokens**: GitHub tokens (ghp_*, gho_*, ghs_*), OAuth tokens, JWT tokens
+- **Credentials**: Passwords, authentication strings, database credentials
+- **Private Keys**: RSA private keys (-----BEGIN PRIVATE KEY-----)
+- **Certificates**: SSL/TLS certificates and keys
+- **Environment Variables**: Hardcoded values for `PASSWORD`, `SECRET`, `TOKEN`, `API_KEY`, etc.
+- **Connection Strings**: Database URLs with embedded credentials
+- **Other Sensitive Data**: Social Security Numbers, credit card numbers, internal URLs
+
+**If potential secrets are detected**:
+
+1. **Stop the PR creation process immediately**
+2. **Warn the user clearly** with:
+   - The type of potential secret found
+   - The file(s) and approximate location
+   - A snippet showing the concerning pattern (masked if possible)
+3. **Ask for explicit confirmation** before proceeding:
+   - "I've detected what appears to be [SECRET_TYPE] in [FILE_PATH]. This could expose sensitive credentials if merged. Would you like to:"
+     - "Remove the sensitive data and try again"
+     - "Proceed anyway (NOT recommended)"
+     - "Cancel the PR creation"
+
+**Only proceed with PR creation if**:
+- No secrets are detected, OR
+- The user explicitly confirms to proceed after being warned
+
+This security check helps prevent accidental credential exposure in pull requests.
+
+### 4. Generate PR Content
 
 Based on the analysis:
 
@@ -102,7 +136,7 @@ Based on the analysis:
    - **Testing**: How the changes were tested (if applicable)
    - **Notes**: Any additional context, breaking changes, or reviewer notes
 
-### 4. Ensure Branch is Pushed
+### 5. Ensure Branch is Pushed
 
 Before creating the PR, make sure your branch is on the remote. Skip this step entirely if `--no-push` was provided.
 
@@ -128,25 +162,40 @@ fi
 
 If the push fails, report the error and ask the user to resolve conflicts or authentication issues. If `--no-push` was used but no upstream exists, clearly surface that the PR cannot be created until the branch is available on the remote (push manually or rerun without `--no-push`).
 
-### 5. Create the Pull Request
+### 6. Create the Pull Request
 
-Use the GitHub CLI to create the PR:
+Use the GitHub CLI to create the PR safely using temporary files to prevent command injection:
 
 ```bash
-gh pr create --base "${BASE_BRANCH}" --title "PR_TITLE" --body "$(cat <<'EOF'
+# Create temporary files for PR title and body
+TITLE_FILE=$(mktemp)
+BODY_FILE=$(mktemp)
+# Ensure temporary files are deleted when the script exits (success or failure)
+trap 'rm -f "$TITLE_FILE" "$BODY_FILE"' EXIT
+
+# Write the generated title to the temporary file
+cat > "$TITLE_FILE" <<'EOF'
+PR_TITLE_HERE
+EOF
+
+# Write the generated PR description to the temporary file
+cat > "$BODY_FILE" <<'EOF'
 PR_DESCRIPTION_HERE
 EOF
-)"
+
+# Create the PR using the temporary files
+gh pr create --base "${BASE_BRANCH}" --title "$(cat "$TITLE_FILE")" --body-file "$BODY_FILE"
 ```
 
 Important notes:
 
-- Replace `PR_TITLE` with the generated title
+- Replace `PR_TITLE_HERE` with the generated title
 - Replace `PR_DESCRIPTION_HERE` with the full PR description
-- Use a HEREDOC to ensure proper formatting of the description
+- Temporary files are used to prevent command injection vulnerabilities from commit messages
+- The `trap` command ensures temporary files are cleaned up even if the command fails
 - The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`.
 
-### 6. Handle the Result
+### 7. Handle the Result
 
 After creating the PR:
 
