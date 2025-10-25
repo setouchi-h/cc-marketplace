@@ -1,141 +1,93 @@
 ---
-name: create-pr
 description: Analyze local git changes and create a structured GitHub pull request.
-usage: /create-pr [-d|--draft] [-b|--base <branch>] [-r|--reviewer <user> ...] [--no-push] [--assign-me]
-arguments: []
-flags:
-  - name: --draft
-    alias: -d
-    type: boolean
-    description: Create the pull request as a draft.
-  - name: --base
-    alias: -b
-    type: string
-    description: Specify the base branch; required if default cannot be detected.
-  - name: --reviewer
-    alias: -r
-    type: string
-    repeatable: true
-    description: Add a GitHub username as a reviewer. Provide the flag multiple times to add more than one reviewer.
-  - name: --no-push
-    type: boolean
-    description: Skip pushing the current branch before creating the pull request.
-  - name: --assign-me
-    type: boolean
-    description: Attempt to assign the PR to yourself (@me). If not permitted, PR creation still succeeds without assignment.
-permissions:
-  - command: git
-  - command: gh
+argument-hint: "[-d|--draft] [-b <branch>] [-r <user> ...] [--no-push] [--assign-me]"
+allowed-tools:
+  - Bash(git status:*)
+  - Bash(git diff:*)
+  - Bash(git branch:*)
+  - Bash(git rev-parse:*)
+  - Bash(git rev-list:*)
+  - Bash(gh:*)
+  - Bash(git push:*)
 ---
 
 # Create Pull Request
 
-You are an AI assistant specialized in creating well-structured pull requests.
+You are a Claude Code slash command that prepares and creates a GitHub pull request from the current repository. Follow the protocol below exactly, using only the allowed tools.
 
-## Instructions
+## Inputs
 
-### 1. Prepare Environment
+Parse the arguments provided to this command (`$ARGUMENTS`) and support these flags:
+- `--draft`, `-d`: create the PR as draft.
+- `--base <branch>`, `-b <branch>`: base branch. If omitted, detect the default branch.
+- `--reviewer <user>`, `-r <user>`: may appear multiple times; add each as reviewer.
+- `--no-push`: do not push the branch before creating the PR.
+- `--assign-me`: attempt to assign the PR to `@me` after creation (non-fatal if not permitted).
 
-Run the preparation script to detect the default branch and gather git information:
+## Context Gathering
 
-```bash
-source ./scripts/pr-prepare.sh
+Use Bash to collect repository context. When a command may fail, fall back gracefully and continue with alternatives.
+- Current branch: run `git branch --show-current`.
+- Default/base branch detection order:
+  1) `--base` flag if provided.
+  2) `git symbolic-ref -q --short refs/remotes/origin/HEAD` → strip `origin/`.
+  3) `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` (only if `gh` is installed and authenticated).
+  If still unknown, ask the user to specify `--base <branch>` and stop.
+- Working tree status: `git status --porcelain` and `git status -sb`.
+- Diff summary: `git diff --stat "origin/<base>"...HEAD` (fallback: `git diff --stat HEAD~5...HEAD`).
+- Staged vs unstaged changes: `git diff --staged` and `git diff`.
+- Ahead/behind: `git rev-list --left-right --count origin/<base>...HEAD` if upstream exists.
+
+## Safety Check
+
+Scan the diff for likely secrets or credentials. Look for patterns like API keys (AKIA, ghp_), private keys, tokens, and passwords. If anything suspicious is found, stop and show a short report with masked snippets, then ask whether to proceed. Default to cancel if the user doesn’t confirm.
+
+## Compose PR
+
+Draft a concise title (<= 72 chars, imperative mood). Create a structured body with the following sections:
+
 ```
-
-This script exports `BASE_BRANCH` and `CURRENT_BRANCH` environment variables for use in subsequent steps.
-
-### 2. Analyze Changes
-
-Get the detailed diff of changes:
-
-```bash
-git diff "origin/${BASE_BRANCH}"...HEAD 2>/dev/null || git diff HEAD~5...HEAD
-```
-
-### 3. Security Check & PR Generation
-
-**IMPORTANT**: Analyze the diff for potential secrets or sensitive data before creating the PR.
-
-Check for these patterns:
-
-- **API Keys**: AWS keys (AKIA*, AWS\_*), Google API keys, Azure keys
-- **Tokens**: GitHub tokens (ghp*\*, gho*_, ghs\__), OAuth tokens, JWT tokens
-- **Credentials**: Passwords, authentication strings, database credentials
-- **Private Keys**: RSA private keys (-----BEGIN PRIVATE KEY-----)
-- **Environment Variables**: Hardcoded `PASSWORD`, `SECRET`, `TOKEN`, `API_KEY`
-- **Connection Strings**: Database URLs with embedded credentials
-
-**If secrets are detected**:
-
-1. Stop immediately and warn the user with:
-   - The type of potential secret
-   - File location
-   - A masked snippet
-2. Ask for confirmation to proceed (NOT recommended) or cancel
-
-**If no secrets detected, create the PR**:
-
-1. **Generate PR Title**:
-
-   - Use imperative mood (e.g., "Add feature", not "Added feature")
-   - Keep under 72 characters
-   - Summarize the main purpose
-
-2. **Generate PR Description** using this format:
-
-```markdown
 ## Summary
-
-[Brief overview in 1-3 sentences]
+<1–3 sentence overview>
 
 ## Changes
-
-- [Key change 1]
-- [Key change 2]
-- [Key change 3]
+- <key change>
+- <key change>
 
 ## Motivation
-
-[Why these changes were needed]
+<why this change is needed>
 
 ## Testing
+- <how you validated it>
 
-- [How changes were tested]
-- [Test results or validation steps]
-
-## Notes
-
-[Any additional context, breaking changes, or reviewer notes]
+## Risks
+- <potential risks / rollbacks>
 ```
 
-### 4. Create the Pull Request
+Confirm the title and body with the user before proceeding.
 
-Call the PR creation script with the generated title and body:
+## Push (optional)
 
-```bash
-./scripts/pr-create.sh "$PR_TITLE" "$PR_BODY"
-```
+If `--no-push` is NOT set and the branch is ahead of its remote (or has no upstream):
+- Show the exact push command you will run.
+- Ask for confirmation.
+- Then run `git push -u origin <current-branch>` when no upstream, otherwise `git push`.
 
-The script will:
+## Create PR
 
-- Push the branch to remote (unless `--no-push` was specified via `NO_PUSH=true`)
-- Create the PR using `gh pr create` with the appropriate flags
-- Handle `--draft` mode via `DRAFT_MODE=true`
-- Add reviewers via `REVIEWERS="user1,user2"`
-- Assign to yourself via `ASSIGN_ME=true` (attempted after PR creation; non-fatal if repository doesn't allow assignment)
+Build the `gh pr create` command with the resolved options and show it before execution. Use these flags when available:
+- `--base <base>`
+- `--draft` when `--draft` was passed
+- `--reviewer <user>` per reviewer occurrence
+- `--title <title>` and `--body <body>` (prefer `--body` inline; if the content is large, write to a temp file and use `--body-file`)
 
-### 5. Report Results
+Execute the command and capture the resulting PR URL or number. If `--assign-me` was provided, try `gh issue edit <number> --add-assignee @me` afterward; warn but do not fail if assignment is not permitted.
 
-After creating the PR:
+## Output
 
-- Display the PR URL
-- Provide a summary of what was created
-- If errors occurred, explain them clearly and suggest next steps
+Print:
+- PR URL (or number) and status (draft/ready)
+- Base branch and source branch
+- Reviewers added (if any)
 
-## Error Handling
-
-If any step fails:
-
-1. Explain what went wrong with the exact error message
-2. Suggest actionable solutions
-3. Ask if the user wants to try an alternative approach
+If any step fails, report the exact command and stderr, provide a short diagnosis, and suggest concrete next steps.
