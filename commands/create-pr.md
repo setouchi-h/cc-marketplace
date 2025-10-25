@@ -190,8 +190,8 @@ Use the GitHub CLI to create the PR safely using temporary files to prevent comm
 
 ```bash
 # Create temporary files for PR title and body
-TITLE_FILE=$(mktemp)
-BODY_FILE=$(mktemp)
+TITLE_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-title.XXXXXX")
+BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX")
 # Ensure temporary files are deleted when the script exits (success or failure)
 trap 'rm -f "$TITLE_FILE" "$BODY_FILE"' EXIT
 
@@ -205,23 +205,26 @@ cat > "$BODY_FILE" <<'EOF'
 PR_DESCRIPTION_HERE
 EOF
 
-# Build the gh pr create command with conditional flags
-GH_CMD="gh pr create --base \"${BASE_BRANCH}\" --title \"\$(cat \"$TITLE_FILE\")\" --body-file \"$BODY_FILE\""
+# Build the gh pr create command with conditional flags (array-based for security)
+GH_CMD=(gh pr create --base "${BASE_BRANCH}" --title "$(cat "$TITLE_FILE")" --body-file "$BODY_FILE")
 
 # Add --draft flag if DRAFT_MODE is set
 if [ "${DRAFT_MODE:-false}" = "true" ]; then
-  GH_CMD="$GH_CMD --draft"
+  GH_CMD+=(--draft)
 fi
 
 # Add reviewers if REVIEWERS is set (comma or space-separated list)
 if [ -n "${REVIEWERS:-}" ]; then
   for reviewer in ${REVIEWERS//,/ }; do
-    GH_CMD="$GH_CMD --reviewer \"$reviewer\""
+    reviewer=$(echo "$reviewer" | xargs)  # Trim whitespace
+    if [ -n "$reviewer" ]; then
+      GH_CMD+=(--reviewer "$reviewer")
+    fi
   done
 fi
 
 # Execute the command
-eval "$GH_CMD"
+"${GH_CMD[@]}"
 ```
 
 Important notes:
