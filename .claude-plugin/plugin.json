@@ -1,5 +1,4 @@
 {
-  "schema_version": 1,
   "name": "pr-creator",
   "version": "1.0.0",
   "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
@@ -17,11 +16,8 @@
     "git",
     "automation"
   ],
-  "category": "productivity",
   "commands": [
-    {
-      "name": "create-pr",
-      "path": "./commands/create-pr.md"
-    }
+    "./commands/create-pr.md"
   ]
 }
+

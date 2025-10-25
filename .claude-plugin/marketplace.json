@@ -1,5 +1,4 @@
 {
-  "schema_version": 1,
   "name": "pr-tools",
   "owner": {
     "name": "Kazukuki Hashimoto",
@@ -32,3 +31,4 @@
     }
   ]
 }
+
