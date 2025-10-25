@@ -30,8 +30,9 @@ Use Bash to collect repository context. When a command may fail, fall back grace
 - Current branch: run `git branch --show-current`.
 - Default/base branch detection order:
   1) `--base` flag if provided.
-  2) `git symbolic-ref -q --short refs/remotes/origin/HEAD` → strip `origin/`.
-  3) `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` (only if `gh` is installed and authenticated).
+  2) `git ls-remote --symref origin HEAD | awk '/^ref:/ {sub(/refs\/heads\//, "", $2); print $2}'` (directly queries remote HEAD).
+  3) `git symbolic-ref -q --short refs/remotes/origin/HEAD | sed 's/^origin\///'` (uses local origin/HEAD if set).
+  4) `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` (only if `gh` is installed and authenticated).
   If still unknown, ask the user to specify `--base <branch>` and stop.
 - Working tree status: `git status --porcelain` and `git status -sb`.
 - Diff summary: `git diff --stat "origin/<base>"...HEAD` (fallback: `git diff --stat HEAD~5...HEAD`).
