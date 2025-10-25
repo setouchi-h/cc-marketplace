@@ -1,5 +1,5 @@
 {
-  "name": "pr-tools",
+  "name": "git-tools",
   "owner": {
     "name": "Kazuki Hashimoto",
     "email": "setouchi.develop@gmail.com"
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "pr-creator",
+      "name": "git-tools",
       "source": "./",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
       "version": "1.0.0",
@@ -31,4 +31,3 @@
     }
   ]
 }
-

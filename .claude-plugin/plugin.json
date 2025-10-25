@@ -1,5 +1,5 @@
 {
-  "name": "pr-creator",
+  "name": "git-tools",
   "version": "1.0.0",
   "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
   "author": {
@@ -20,4 +20,3 @@
     "./commands/create-pr.md"
   ]
 }
-

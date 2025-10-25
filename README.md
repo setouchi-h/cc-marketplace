@@ -1,4 +1,4 @@
-# PR Creator Plugin for Claude Code
+# Git Tools Plugin for Claude Code
 
 [日本語版はこちら](README.ja.md)
 
@@ -25,7 +25,7 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 
 ```bash
 /plugin marketplace add setouchi-h/pr-tools
-/plugin install pr-creator@pr-tools
+/plugin install git-tools@git-tools
 ```
 
 ### From Local Directory
@@ -42,7 +42,7 @@ cd /path/to/pr-tools
 Simply run the command in Claude Code:
 
 ```bash
-/create-pr
+/git-tools:create-pr
 ```
 
 The plugin will:
@@ -140,7 +140,7 @@ Any additional context, breaking changes, or reviewer notes
 
 If the `/create-pr` command is not recognized:
 1. Verify the plugin is installed: `/plugin list`
-2. Reinstall if needed: `/plugin install pr-creator@pr-tools`
+2. Reinstall if needed: `/plugin install git-tools@git-tools`
 3. Restart Claude Code
 
 ### GitHub CLI Not Found
