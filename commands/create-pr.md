@@ -122,7 +122,7 @@ The script will:
 - Create the PR using `gh pr create` with the appropriate flags
 - Handle `--draft` mode via `DRAFT_MODE=true`
 - Add reviewers via `REVIEWERS="user1,user2"`
-- Assign to yourself via `ASSIGN_ME=true` (with automatic fallback if repository doesn't allow assignment)
+- Assign to yourself via `ASSIGN_ME=true` (attempted after PR creation; non-fatal if repository doesn't allow assignment)
 
 ### 5. Report Results
 

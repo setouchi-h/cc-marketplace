@@ -63,17 +63,27 @@ if [ -n "${REVIEWERS:-}" ]; then
   done
 fi
 
-# Add --assignee @me if specified, with fallback if assignment fails
+echo "Creating pull request..."
+"${GH_CMD[@]}"
+
+# Optionally attempt to assign after successful creation.
+# This avoids masking unrelated errors from `gh pr create` and prevents accidental duplicate creation.
 if [ "${ASSIGN_ME:-false}" = "true" ]; then
-  echo "Creating pull request and attempting to assign to yourself..."
-  # Try with --assignee @me first
-  if ! "${GH_CMD[@]}" --assignee @me 2>/dev/null; then
-    echo "Warning: Could not assign PR to yourself (repository may not allow it). Creating PR without assignment..." >&2
-    # Retry without assignment
-    "${GH_CMD[@]}"
+  echo "Attempting to assign PR to yourself (@me)..."
+  # Resolve the PR number for the current branch. Do not fail the script if this lookup fails.
+  if PR_NUMBER=$(gh pr view --json number --jq .number 2>/dev/null); then
+    # Try assigning via the Issues API (PRs are also issues). Non-fatal on failure.
+    if ! gh issue edit "$PR_NUMBER" --add-assignee @me 2>"${TMPDIR:-/tmp}/pr-assign.error"; then
+      echo "Warning: Could not assign PR to yourself. Repository may disallow assignment for your role." >&2
+      # Surface the underlying error to avoid misleading messages
+      if [ -s "${TMPDIR:-/tmp}/pr-assign.error" ]; then
+        sed 's/^/  > /' "${TMPDIR:-/tmp}/pr-assign.error" >&2 || true
+      fi
+      rm -f "${TMPDIR:-/tmp}/pr-assign.error" || true
+    else
+      echo "Assigned @me to PR #$PR_NUMBER."
+    fi
+  else
+    echo "Warning: Created PR, but could not resolve PR number to assign. Skipping assignment." >&2
   fi
-else
-  # Execute the command without assignment
-  echo "Creating pull request..."
-  "${GH_CMD[@]}"
 fi
