@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "pr-creator",
-      "source": ".",
+      "source": "./",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
       "version": "1.0.0",
       "author": {
