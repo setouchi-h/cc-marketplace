@@ -1,13 +1,13 @@
 {
-  "name": "pr-creator",
+  "name": "gh",
   "version": "1.0.0",
   "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
   "author": {
     "name": "Kazuki Hashimoto",
     "email": "setouchi.develop@gmail.com"
   },
-  "homepage": "https://github.com/setouchi-h/pr-tools",
-  "repository": "https://github.com/setouchi-h/pr-tools",
+  "homepage": "https://github.com/setouchi-h/git-tools",
+  "repository": "https://github.com/setouchi-h/git-tools",
   "license": "MIT",
   "keywords": [
     "pr",
@@ -20,4 +20,3 @@
     "./commands/create-pr.md"
   ]
 }
-
