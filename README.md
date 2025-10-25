@@ -8,6 +8,7 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 
 - **Intelligent Analysis**: Automatically analyzes your git changes, commits, and diffs
 - **Smart PR Generation**: Creates comprehensive PR descriptions with proper formatting
+- **Auto-Assignee**: Automatically assigns the PR creator as the assignee
 - **Flexible Options**: Supports draft PRs, custom base branches, and reviewer assignments
 - **Error Handling**: Provides clear error messages and actionable solutions
 - **GitHub Integration**: Seamlessly integrates with GitHub CLI (`gh`)
@@ -49,7 +50,7 @@ The plugin will:
 1. Analyze your current branch and changes
 2. Generate a comprehensive PR title and description
 3. Push your branch if needed
-4. Create the pull request on GitHub
+4. Create the pull request on GitHub (automatically assigning you as the assignee)
 5. Display the PR URL
 
 ### Advanced Options
@@ -94,7 +95,7 @@ Examples with short flags:
      - Motivation and context
      - Testing information
      - Additional notes
-4. **PR Creation**: Uses `gh pr create` to create the pull request
+4. **PR Creation**: Uses `gh pr create` to create the pull request (automatically assigning you as the assignee)
 5. **Result Display**: Shows the PR URL and summary
 
 ### Permissions

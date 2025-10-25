@@ -238,7 +238,7 @@ EOF
 # Build the gh pr create command with conditional flags (array-based for security)
 # Read title into a variable to avoid command substitution inside array initializer
 TITLE_CONTENT=$(<"$TITLE_FILE")
-GH_CMD=(gh pr create --base "$BASE_BRANCH" --title "$TITLE_CONTENT" --body-file "$BODY_FILE")
+GH_CMD=(gh pr create --base "$BASE_BRANCH" --title "$TITLE_CONTENT" --body-file "$BODY_FILE" --assignee @me)
 
 # Add --draft flag if DRAFT_MODE is set
 if [ "${DRAFT_MODE:-false}" = "true" ]; then
@@ -269,6 +269,7 @@ Important notes:
 - Temporary files are used to prevent command injection vulnerabilities from commit messages
 - The `trap` command ensures temporary files are cleaned up even if the command fails
 - The PR will be created against the detected base branch (`${BASE_BRANCH}`), or the one provided via `--base`
+- The authenticated GitHub user (PR creator) is automatically assigned to the PR using `--assignee @me`
 - Set `DRAFT_MODE=true` if the `--draft` flag is provided
 - Set `REVIEWERS` as a comma or space-separated list if `--reviewer` flags are provided (e.g., `REVIEWERS="user1 user2"` or `REVIEWERS="user1,user2"`)
 - If the default base branch cannot be detected via `origin/HEAD` or the GitHub API, the command fails with an error; pass `--base <branch>` or export `BASE_BRANCH` explicitly.
