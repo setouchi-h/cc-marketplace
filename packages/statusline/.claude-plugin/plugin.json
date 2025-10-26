@@ -1,0 +1,17 @@
+{
+  "name": "statusline",
+  "version": "0.1.0",
+  "description": "Installs a status line script for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
+  "author": {
+    "name": "Kazuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
+  },
+  "homepage": "https://github.com/setouchi-h/cc-marketplace",
+  "repository": "https://github.com/setouchi-h/cc-marketplace",
+  "license": "MIT",
+  "keywords": ["claude", "statusline", "productivity", "shell"],
+  "commands": [
+    "./commands/install-statusline.md",
+    "./commands/preview-statusline.md"
+  ]
+}

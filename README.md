@@ -1,8 +1,12 @@
-# Git Tools Plugin for Claude Code
+# CC Marketplace for Claude Code
 
 [日本語版はこちら](README.ja.md)
 
-An intelligent Claude Code plugin that analyzes your changes and creates well-structured pull requests automatically.
+This repository provides a Claude Code marketplace bundle (cc-marketplace).
+
+Included plugins:
+- `gh`: Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
+- `statusline`: Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
 
 ## Features
 
@@ -24,14 +28,14 @@ An intelligent Claude Code plugin that analyzes your changes and creates well-st
 ### From GitHub (Recommended)
 
 ```bash
-/plugin marketplace add setouchi-h/git-tools
-/plugin install gh@git-tools
+/plugin marketplace add setouchi-h/cc-marketplace
+/plugin install gh@cc-marketplace
 ```
 
 ### From Local Directory
 
 ```bash
-cd /path/to/git-tools
+cd /path/to/cc-marketplace
 /plugin install .
 ```
 
@@ -140,7 +144,7 @@ Any additional context, breaking changes, or reviewer notes
 
 If the `/create-pr` command is not recognized:
 1. Verify the plugin is installed: `/plugin list`
-2. Reinstall if needed: `/plugin install gh@git-tools`
+2. Reinstall if needed: `/plugin install gh@cc-marketplace`
 3. Restart Claude Code
 
 ### GitHub CLI Not Found
