@@ -42,17 +42,35 @@ tee ~/.claude/scripts/statusline.sh >/dev/null <<'EOF'
 # Status line script for Claude Code
 # Displays: Branch, Model, Cost, Duration, Lines changed, and a quote
 
+# Check if jq is installed
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Error: jq is required but not installed. Please install jq first." >&2
+  exit 1
+fi
+
 # Read JSON input from stdin
 input=$(cat)
 
+# Validate JSON input
+if [ -z "$input" ]; then
+  echo "Error: No JSON input received from Claude Code." >&2
+  exit 1
+fi
+
 # Extract data from JSON
-cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
-duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
-lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
-lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
-model_name=$(echo "$input" | jq -r '.model.display_name // "Sonnet 4.5"')
-model_id=$(echo "$input" | jq -r '.model.id // "claude-sonnet-4-5-20250929"')
-workspace_dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // ""')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' 2>/dev/null)
+duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0' 2>/dev/null)
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0' 2>/dev/null)
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0' 2>/dev/null)
+model_name=$(echo "$input" | jq -r '.model.display_name // "Sonnet 4.5"' 2>/dev/null)
+model_id=$(echo "$input" | jq -r '.model.id // ""' 2>/dev/null)
+workspace_dir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // ""' 2>/dev/null)
+
+# Validate critical values were parsed successfully
+if [ -z "$cost" ] || [ "$cost" = "null" ]; then
+  echo "Error: Failed to parse session data. Invalid or malformed JSON input." >&2
+  exit 1
+fi
 
 # Get current git branch (use workspace directory if available)
 if [ -n "$workspace_dir" ] && [ -d "$workspace_dir" ]; then
@@ -83,7 +101,19 @@ get_quote() {
 
   # Check if cache exists and is fresh (less than 5 minutes old)
   if [ -f "$cache_file" ]; then
-    local cache_age=$(( $(date +%s) - $(stat -f %m "$cache_file" 2>/dev/null || echo 0) ))
+    # Portable mtime check: GNU `stat -c %Y` first, then BSD `stat -f %m`.
+    # Avoid inline arithmetic with command substitution to prevent multi-line issues.
+    local now mtime cache_age
+    now=$(date +%s)
+    if mtime=$(stat -c %Y "$cache_file" 2>/dev/null); then
+      :
+    else
+      mtime=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+    fi
+    # Ensure numeric value (defensive in case of unexpected output)
+    mtime=${mtime//[^0-9]/}
+    [ -z "$mtime" ] && mtime=0
+    cache_age=$(( now - mtime ))
 
     # Use cached quote if it's less than 5 minutes old
     if [ "$cache_age" -lt "$cache_max_age" ]; then
@@ -122,6 +152,13 @@ get_quote() {
 
 quote=$(get_quote)
 
+# Prepare model display string (include ID only if available)
+if [ -n "$model_id" ] && [ "$model_id" != "null" ]; then
+  model_display="$model_name \033[2;90m($model_id)\033[0m"
+else
+  model_display="$model_name"
+fi
+
 # Apply dim gray color to each word in the quote to ensure color persists on line wrap
 # This workaround applies the color code to each word individually
 apply_color_per_word() {
@@ -130,28 +167,24 @@ apply_color_per_word() {
   local reset_code="\033[0m"
 
   # Split the text into words and apply color to each word
-  local colored_words=""
+  local words=($text)
+  local result=""
   local word
 
-  # Read words while preserving quotes and special characters
-  while IFS= read -r word || [ -n "$word" ]; do
-    if [ -n "$colored_words" ]; then
-      colored_words="${colored_words} ${color_code}${word}${reset_code}"
-    else
-      colored_words="${color_code}${word}${reset_code}"
-    fi
-  done < <(echo "$text" | tr ' ' '\n')
+  for word in "${words[@]}"; do
+    result+="${color_code}${word}${reset_code} "
+  done
 
-  echo -n "$colored_words"
+  # Remove trailing space and output
+  echo -n "${result% }"
 }
 
 colored_quote=$(apply_color_per_word "$quote")
 
 # Build and print status line with emojis and colors
-printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%s\033[0m \033[2;90m(%s)\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
+printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%s\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
   "$branch" \
-  "$model_name" \
-  "$model_id" \
+  "$model_display" \
   "$cost" \
   "$duration_str" \
   "$lines_added" \
@@ -169,4 +202,3 @@ chmod +x ~/.claude/scripts/statusline.sh
 
 - The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback.
 - To test locally, see the separate "Preview Statusline" command.
-
