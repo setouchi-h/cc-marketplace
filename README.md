@@ -55,13 +55,6 @@ Included plugins:
 /plugin install statusline@cc-marketplace
 ```
 
-### From Local Directory
-
-```bash
-cd /path/to/cc-marketplace
-/plugin install .
-```
-
 ---
 
 ## gh Plugin
@@ -194,30 +187,6 @@ This command:
 - Creates `~/.claude/scripts/` directory if it doesn't exist
 - Writes the status line script to `~/.claude/scripts/statusline.sh`
 - Makes the script executable
-
-#### Step 3: Configure Claude Code
-
-Add the status line to your Claude Code configuration by editing `~/.config/claude/config.json`:
-
-```json
-{
-  "statusline": {
-    "command": "~/.claude/scripts/statusline.sh"
-  }
-}
-```
-
-Or use the Claude Code settings UI to set the statusline command path.
-
-#### Install or Update
-
-```bash
-# First-time installation
-/statusline:install-statusline
-
-# Force reinstall (overwrites existing script)
-/statusline:install-statusline --force
-```
 
 #### Preview the Status Line
 

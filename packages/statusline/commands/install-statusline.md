@@ -8,6 +8,8 @@ allowed-tools:
   - Bash(which:*)
   - Bash(echo:*)
   - Bash(test:*)
+  - Bash(cat:*)
+  - Bash(jq:*)
 ---
 
 # Install Statusline
@@ -19,6 +21,8 @@ This command writes a shell script to `~/.claude/scripts/statusline.sh` that ren
 - If the target file exists and `--force` is not provided, confirm before overwriting.
 - Ensures the `~/.claude/scripts` directory exists and sets the script executable.
 - Verifies `jq` is available (required by the script) and warns if missing.
+- Automatically configures `~/.claude/settings.json` to enable the status line.
+- If `statusLine` is already configured and `--force` is not provided, skips configuration update.
 
 ## Steps
 
@@ -198,7 +202,30 @@ chmod +x ~/.claude/scripts/statusline.sh
 
 - Run: `echo "Installed: ~/.claude/scripts/statusline.sh"`
 
+5) Configure `~/.claude/settings.json` to enable the status line:
+
+- First, check if `~/.claude/settings.json` exists. If not, create it with minimal JSON structure:
+
+```bash
+if [ ! -f ~/.claude/settings.json ]; then
+  echo '{"$schema":"https://json.schemastore.org/claude-code-settings.json"}' > ~/.claude/settings.json
+fi
+```
+
+- Check if `statusLine` is already configured (skip if already set and `--force` is not provided):
+
+```bash
+if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 && [ "$ARGUMENTS" != "--force" ]; then
+  echo "statusLine already configured in ~/.claude/settings.json (use --force to overwrite)"
+else
+  # Add or update statusLine configuration
+  jq '.statusLine = {"type": "command", "command": "bash ~/.claude/scripts/statusline.sh"}' ~/.claude/settings.json > ~/.claude/settings.json.tmp && mv ~/.claude/settings.json.tmp ~/.claude/settings.json
+  echo "Configured statusLine in ~/.claude/settings.json"
+fi
+```
+
 ## Notes
 
 - The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback.
+- The command automatically updates `~/.claude/settings.json` to enable the status line. Use `--force` to overwrite existing configurations.
 - To test locally, see the separate "Preview Statusline" command.

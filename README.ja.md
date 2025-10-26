@@ -54,13 +54,6 @@
 /plugin install statusline@cc-marketplace
 ```
 
-### ローカルディレクトリから
-
-```bash
-cd /path/to/cc-marketplace
-/plugin install .
-```
-
 ---
 
 ## gh プラグイン
@@ -193,30 +186,6 @@ statusline プラグインは、Claude Code セッションに関する豊富な
 - `~/.claude/scripts/` ディレクトリが存在しない場合は作成
 - `~/.claude/scripts/statusline.sh` にステータスラインスクリプトを書き込み
 - スクリプトを実行可能にする
-
-#### ステップ 3: Claude Code の設定
-
-`~/.config/claude/config.json` を編集して、ステータスラインを Claude Code の設定に追加します：
-
-```json
-{
-  "statusline": {
-    "command": "~/.claude/scripts/statusline.sh"
-  }
-}
-```
-
-または、Claude Code の設定 UI を使用してステータスラインコマンドのパスを設定します。
-
-#### インストールまたは更新
-
-```bash
-# 初回インストール
-/statusline:install-statusline
-
-# 強制的に再インストール（既存のスクリプトを上書き）
-/statusline:install-statusline --force
-```
 
 #### ステータスラインのプレビュー
 
