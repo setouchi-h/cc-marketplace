@@ -6,8 +6,8 @@
     "name": "Kazuki Hashimoto",
     "email": "setouchi.develop@gmail.com"
   },
-  "homepage": "https://github.com/setouchi-h/git-tools",
-  "repository": "https://github.com/setouchi-h/git-tools",
+  "homepage": "https://github.com/setouchi-h/cc-marketplace",
+  "repository": "https://github.com/setouchi-h/cc-marketplace",
   "license": "MIT",
   "keywords": [
     "pr",
@@ -20,4 +20,3 @@
     "./commands/create-pr.md"
   ]
 }
-
