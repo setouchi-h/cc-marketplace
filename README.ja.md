@@ -170,9 +170,7 @@ statusline プラグインは、Claude Code セッションに関する豊富な
 
 出力例：
 
-```
-🌿 main | 🤖 Sonnet 4.5 (claude-sonnet-4-5-20250929) | 💰 $0.0123 | ⏱️ 1m49s | 📝 +10/-2 | 💬 "Code is poetry" - Anonymous
-```
+![Statusline Example](assets/statusline.png)
 
 ### インストール
 
