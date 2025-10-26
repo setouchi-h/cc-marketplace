@@ -8,6 +8,9 @@ allowed-tools:
   - Bash(which:*)
   - Bash(echo:*)
   - Bash(test:*)
+  - Bash(cat:*)
+  - Bash(jq:*)
+  - Bash(mv:*)
 ---
 
 # Install Statusline
@@ -19,6 +22,8 @@ This command writes a shell script to `~/.claude/scripts/statusline.sh` that ren
 - If the target file exists and `--force` is not provided, confirm before overwriting.
 - Ensures the `~/.claude/scripts` directory exists and sets the script executable.
 - Verifies `jq` is available (required by the script) and warns if missing.
+- Automatically configures `~/.claude/settings.json` to enable the status line.
+- If `statusLine` is already configured and `--force` is not provided, skips configuration update.
 
 ## Steps
 
@@ -198,7 +203,56 @@ chmod +x ~/.claude/scripts/statusline.sh
 
 - Run: `echo "Installed: ~/.claude/scripts/statusline.sh"`
 
+5) Configure `~/.claude/settings.json` to enable the status line:
+
+- First, check if `~/.claude/settings.json` exists. If not, create it with minimal JSON structure:
+
+```bash
+if [ ! -f ~/.claude/settings.json ]; then
+  echo '{"$schema":"https://json.schemastore.org/claude-code-settings.json"}' > ~/.claude/settings.json
+fi
+```
+
+- Check if `statusLine` is already configured (skip if already set and `--force` is not provided):
+
+```bash
+# Ensure jq is available
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Error: jq is required but not installed." >&2
+  exit 1
+fi
+
+# Validate JSON structure before reading fields
+if ! jq empty ~/.claude/settings.json >/dev/null 2>&1; then
+  echo "Error: ~/.claude/settings.json contains invalid JSON. Please fix or remove the file." >&2
+  exit 1
+fi
+
+# Then check for existing statusLine configuration
+if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 && [ "$ARGUMENTS" != "--force" ]; then
+  echo "statusLine already configured in ~/.claude/settings.json (use --force to overwrite)"
+else
+  # Add or update statusLine configuration with backup + error handling
+  cp -p ~/.claude/settings.json ~/.claude/settings.json.backup
+  tmp_file=$(mktemp ~/.claude/settings.json.tmp.XXXXXX)
+  trap 'rm -f "$tmp_file"' EXIT
+
+  if ! jq '.statusLine = {"type": "command", "command": "bash ~/.claude/scripts/statusline.sh"}' \
+       ~/.claude/settings.json > "$tmp_file"; then
+    echo "Error: Failed to update settings.json. Backup preserved at ~/.claude/settings.json.backup" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
+
+  mv "$tmp_file" ~/.claude/settings.json
+  trap - EXIT
+  echo "Configured statusLine in ~/.claude/settings.json (backup at ~/.claude/settings.json.backup)"
+fi
+```
+
 ## Notes
 
 - The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback.
+- The command automatically updates `~/.claude/settings.json` to enable the status line. Use `--force` to overwrite existing configurations.
+- A backup of the previous settings is saved to `~/.claude/settings.json.backup`. Restore with `mv ~/.claude/settings.json.backup ~/.claude/settings.json` if needed.
 - To test locally, see the separate "Preview Statusline" command.
