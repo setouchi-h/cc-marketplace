@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A marketplace bundle for PR creation and management tools.",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -27,7 +27,7 @@
       "name": "statusline",
       "source": "./packages/statusline",
       "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "author": {
         "name": "Kazuki Hashimoto"
       },
@@ -35,6 +35,20 @@
       "repository": "https://github.com/setouchi-h/cc-marketplace",
       "license": "MIT",
       "keywords": ["claude", "statusline", "shell", "productivity"],
+      "category": "productivity"
+    },
+    {
+      "name": "git",
+      "source": "./packages/git",
+      "description": "Git workflow automation tool with git-flow style commit messages and automatic push.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Kazuki Hashimoto"
+      },
+      "homepage": "https://github.com/setouchi-h/cc-marketplace",
+      "repository": "https://github.com/setouchi-h/cc-marketplace",
+      "license": "MIT",
+      "keywords": ["git", "commit", "git-flow", "conventional-commits", "automation"],
       "category": "productivity"
     }
   ]

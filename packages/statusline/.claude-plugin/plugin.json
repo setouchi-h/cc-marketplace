@@ -1,6 +1,6 @@
 {
   "name": "statusline",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Installs a status line script for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
   "author": {
     "name": "Kazuki Hashimoto",
