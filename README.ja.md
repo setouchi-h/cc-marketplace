@@ -186,6 +186,7 @@ statusline プラグインは、Claude Code セッションに関する豊富な
 - `~/.claude/scripts/` ディレクトリが存在しない場合は作成
 - `~/.claude/scripts/statusline.sh` にステータスラインスクリプトを書き込み
 - スクリプトを実行可能にする
+- `~/.claude/settings.json` を自動的に設定してステータスラインを有効化
 
 #### ステータスラインのプレビュー
 

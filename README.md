@@ -187,6 +187,7 @@ This command:
 - Creates `~/.claude/scripts/` directory if it doesn't exist
 - Writes the status line script to `~/.claude/scripts/statusline.sh`
 - Makes the script executable
+- Automatically configures `~/.claude/settings.json` to enable the status line
 
 #### Preview the Status Line
 
