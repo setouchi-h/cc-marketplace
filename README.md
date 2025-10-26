@@ -5,12 +5,14 @@
 This repository provides a Claude Code marketplace bundle (cc-marketplace).
 
 Included plugins:
+
 - `gh`: Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
 - `statusline`: Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
 
 ## Features
 
 ### gh Plugin
+
 - **Intelligent Analysis**: Automatically analyzes your git changes, commits, and diffs
 - **Smart PR Generation**: Creates comprehensive PR descriptions with proper formatting
 - **Flexible Options**: Supports draft PRs, custom base branches, and reviewer assignments
@@ -18,6 +20,7 @@ Included plugins:
 - **GitHub Integration**: Seamlessly integrates with GitHub CLI (`gh`)
 
 ### statusline Plugin
+
 - **Rich Session Info**: Displays branch, model, cost, duration, and line changes
 - **Real-time Updates**: Updates as you work in your Claude Code session
 - **Inspiring Quotes**: Shows a new programming quote every 5 minutes (cached)
@@ -27,13 +30,15 @@ Included plugins:
 ## Prerequisites
 
 ### For gh Plugin
-- [Claude Code](https://claude.ai/download) installed and running
+
+- [Claude Code](https://claude.ai/download) installed
 - `git` installed and available in `PATH`
 - [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
 - A git repository with changes to create a PR from
 
 ### For statusline Plugin
-- [Claude Code](https://claude.ai/download) installed and running
+
+- [Claude Code](https://claude.ai/download) installed
 - `jq` installed and available in `PATH` (for JSON parsing)
 - `curl` installed (for fetching quotes, optional)
 - A git repository (optional, for branch display)
@@ -72,30 +77,12 @@ Simply run the command in Claude Code:
 ```
 
 The plugin will:
+
 1. Analyze your current branch and changes
 2. Generate a comprehensive PR title and description
 3. Push your branch if needed
 4. Create the pull request on GitHub
 5. Display the PR URL
-
-### Advanced Options
-
-```bash
-# Create a draft PR
-/create-pr --draft
-
-# Specify a different base branch
-/create-pr --base develop
-
-# Add reviewers
-/create-pr --reviewer username1 --reviewer username2
-
-# Skip automatic push (if branch is already pushed)
-/create-pr --no-push
-
-# Assign the PR to yourself when permitted
-/create-pr --assign-me
-```
 
 ### Flags
 
@@ -142,49 +129,28 @@ The plugin generates PRs with this structure:
 
 ```markdown
 ## Summary
+
 Brief overview of what this PR accomplishes
 
 ## Changes
+
 - Key change or feature 1
 - Key change or feature 2
 - Key change or feature 3
 
 ## Motivation
+
 Explanation of why these changes were needed
 
 ## Testing
+
 - How the changes were tested
 - Test results or validation steps
 
 ## Notes
+
 Any additional context, breaking changes, or reviewer notes
 ```
-
-### Troubleshooting
-
-#### Command Not Found
-
-If the `/create-pr` command is not recognized:
-1. Verify the plugin is installed: `/plugin list`
-2. Reinstall if needed: `/plugin install gh@cc-marketplace`
-3. Restart Claude Code
-
-#### GitHub CLI Not Found
-
-Install the GitHub CLI:
-- macOS: `brew install gh`
-- Linux: See [GitHub CLI installation](https://github.com/cli/cli#installation)
-- Windows: `winget install --id GitHub.cli`
-
-Then authenticate: `gh auth login`
-
-#### Branch Not Pushed
-
-The plugin automatically pushes your branch. If it fails:
-1. Check your git remote configuration
-2. Verify you have push access to the repository
-3. Resolve any merge conflicts
-4. Try pushing manually: `git push -u origin <branch-name>`
 
 ---
 
@@ -197,6 +163,7 @@ The statusline plugin installs a customizable status line script that displays r
 ### What It Displays
 
 The status line shows:
+
 - 🌿 **Current Branch**: Git branch name (e.g., `main`, `feature/new-ui`)
 - 🤖 **Model**: AI model name and ID (e.g., `Sonnet 4.5`)
 - 💰 **Cost**: Total session cost in USD (e.g., `$0.0123`)
@@ -205,6 +172,7 @@ The status line shows:
 - 💬 **Quote**: Random programming quote (refreshed every 5 minutes)
 
 Example output:
+
 ```
 🌿 main | 🤖 Sonnet 4.5 (claude-sonnet-4-5-20250929) | 💰 $0.0123 | ⏱️ 1m49s | 📝 +10/-2 | 💬 "Code is poetry" - Anonymous
 ```
@@ -225,6 +193,7 @@ Example output:
 ```
 
 This command:
+
 - Checks if `jq` is installed (required for JSON parsing)
 - Creates `~/.claude/scripts/` directory if it doesn't exist
 - Writes the status line script to `~/.claude/scripts/statusline.sh`
@@ -289,57 +258,6 @@ This renders a sample status line using mock data to verify colors and layout.
   - Windows: Download from [jqlang.github.io](https://jqlang.github.io/jq/download/)
 - **curl**: Optional, for fetching quotes (degrades gracefully if unavailable)
 - **git**: Optional, for displaying branch name
-
-### Troubleshooting
-
-#### jq Not Found
-
-If you see "jq is required but not installed":
-
-1. Install jq:
-   - macOS: `brew install jq`
-   - Ubuntu/Debian: `sudo apt-get install jq`
-   - Fedora/RHEL: `sudo yum install jq`
-2. Verify installation: `which jq`
-3. Restart Claude Code
-
-#### Script Not Executing
-
-If the status line doesn't appear:
-
-1. Verify the script exists: `ls -l ~/.claude/scripts/statusline.sh`
-2. Check it's executable: `chmod +x ~/.claude/scripts/statusline.sh`
-3. Test manually: `/statusline:preview-statusline`
-4. Verify Claude Code config points to the correct path
-5. Restart Claude Code
-
-#### No Quotes Appearing
-
-If quotes aren't showing:
-
-1. Check internet connection (quotes are fetched from zenquotes.io)
-2. The script will cache quotes for 5 minutes and fall back to defaults offline
-3. Test curl: `curl -s "https://zenquotes.io/api/random"`
-4. If curl is not installed, quotes will use fallback values
-
-#### Colors Not Showing
-
-If colors don't appear correctly:
-
-1. Ensure your terminal supports ANSI colors
-2. Check terminal color settings
-3. Some terminals may require 256-color support
-
-### Customization
-
-To customize the status line, edit `~/.claude/scripts/statusline.sh`:
-
-- Modify the `printf` format string at the end to change layout
-- Adjust color codes (e.g., `\033[1;92m` for bright green)
-- Change emojis or remove them
-- Modify quote sources or disable quote fetching
-
-After editing, test with `/statusline:preview-statusline`.
 
 ## Contributing
 
