@@ -6,18 +6,10 @@ This repository provides a Claude Code marketplace bundle (cc-marketplace).
 
 Included plugins:
 
-- [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
 - [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
+- [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
 
 ## Features
-
-### gh Plugin
-
-- **Intelligent Analysis**: Automatically analyzes your git changes, commits, and diffs
-- **Smart PR Generation**: Creates comprehensive PR descriptions with proper formatting
-- **Flexible Options**: Supports draft PRs, custom base branches, and reviewer assignments
-- **Error Handling**: Provides clear error messages and actionable solutions
-- **GitHub Integration**: Seamlessly integrates with GitHub CLI (`gh`)
 
 ### statusline Plugin
 
@@ -27,14 +19,15 @@ Included plugins:
 - **Color-Coded Display**: Uses emojis and colors for easy visual parsing
 - **Offline Support**: Gracefully falls back when offline
 
+### gh Plugin
+
+- **Intelligent Analysis**: Automatically analyzes your git changes, commits, and diffs
+- **Smart PR Generation**: Creates comprehensive PR descriptions with proper formatting
+- **Flexible Options**: Supports draft PRs, custom base branches, and reviewer assignments
+- **Error Handling**: Provides clear error messages and actionable solutions
+- **GitHub Integration**: Seamlessly integrates with GitHub CLI (`gh`)
+
 ## Prerequisites
-
-### For gh Plugin
-
-- [Claude Code](https://claude.ai/download) installed
-- `git` installed and available in `PATH`
-- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
-- A git repository with changes to create a PR from
 
 ### For statusline Plugin
 
@@ -43,104 +36,23 @@ Included plugins:
 - `curl` installed (for fetching quotes, optional)
 - A git repository (optional, for branch display)
 
+### For gh Plugin
+
+- [Claude Code](https://claude.ai/download) installed
+- `git` installed and available in `PATH`
+- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
+- A git repository with changes to create a PR from
+
 ## Installation
 
 ### From GitHub (Recommended)
 
 ```bash
 /plugin marketplace add setouchi-h/cc-marketplace
-# Install gh plugin
-/plugin install gh@cc-marketplace
 # Install statusline plugin
 /plugin install statusline@cc-marketplace
-```
-
----
-
-## gh Plugin
-
-### Basic Usage
-
-Simply run the command in Claude Code:
-
-```bash
-/gh:create-pr
-```
-
-The plugin will:
-
-1. Analyze your current branch and changes
-2. Generate a comprehensive PR title and description
-3. Push your branch if needed
-4. Create the pull request on GitHub
-5. Display the PR URL
-
-### Flags
-
-- `-d, --draft`: Create as a draft PR
-- `-b, --base <branch>`: Use an alternate base branch. Defaults to the repository's default branch (commonly `main` or `master`).
-- `-r, --reviewer <user>`: Add a GitHub username as a reviewer. Repeat the flag to add multiple reviewers.
-- `--no-push`: Skip pushing the current branch before creating the PR.
-- `--assign-me`: Attempt to assign the PR to the authenticated user (`@me`). Assignment happens after the PR is created; if assignment isn’t permitted, a warning is shown and PR creation still succeeds.
-
-Examples with short flags:
-
-```bash
-# Draft PR against a custom base with two reviewers
-/create-pr -d -b develop -r alice -r bob
-```
-
-### How It Works
-
-1. **Branch Analysis**: Checks your current branch status and remote tracking
-2. **Change Detection**: Analyzes commits and diffs since the base branch
-3. **Content Generation**: Creates a PR with:
-   - Concise, descriptive title (imperative mood, <72 chars)
-   - Comprehensive description including:
-     - Summary of changes
-     - Detailed change list
-     - Motivation and context
-     - Testing information
-     - Additional notes
-4. **PR Creation**: Uses `gh pr create` to create the pull request
-5. **Result Display**: Shows the PR URL and summary
-
-### Permissions
-
-This plugin invokes the following local commands:
-
-- `git` — to inspect status, branches, commits, and diffs
-- `gh` — to create the pull request via GitHub CLI
-
-It relies on your existing `gh auth login` session and does not store credentials itself.
-
-### Example PR Description
-
-The plugin generates PRs with this structure:
-
-```markdown
-## Summary
-
-Brief overview of what this PR accomplishes
-
-## Changes
-
-- Key change or feature 1
-- Key change or feature 2
-- Key change or feature 3
-
-## Motivation
-
-Explanation of why these changes were needed
-
-## Testing
-
-- How the changes were tested
-- Test results or validation steps
-
-## Notes
-
-Any additional context, breaking changes, or reviewer notes
+# Install gh plugin
+/plugin install gh@cc-marketplace
 ```
 
 ---
@@ -222,6 +134,94 @@ This renders a sample status line using mock data to verify colors and layout.
   - Windows: Download from [jqlang.github.io](https://jqlang.github.io/jq/download/)
 - **curl**: Optional, for fetching quotes (degrades gracefully if unavailable)
 - **git**: Optional, for displaying branch name
+
+---
+
+## gh Plugin
+
+### Basic Usage
+
+Simply run the command in Claude Code:
+
+```bash
+/gh:create-pr
+```
+
+The plugin will:
+
+1. Analyze your current branch and changes
+2. Generate a comprehensive PR title and description
+3. Push your branch if needed
+4. Create the pull request on GitHub
+5. Display the PR URL
+
+### Flags
+
+- `-d, --draft`: Create as a draft PR
+- `-b, --base <branch>`: Use an alternate base branch. Defaults to the repository's default branch (commonly `main` or `master`).
+- `-r, --reviewer <user>`: Add a GitHub username as a reviewer. Repeat the flag to add multiple reviewers.
+- `--no-push`: Skip pushing the current branch before creating the PR.
+- `--assign-me`: Attempt to assign the PR to the authenticated user (`@me`). Assignment happens after the PR is created; if assignment isn't permitted, a warning is shown and PR creation still succeeds.
+
+Examples with short flags:
+
+```bash
+# Draft PR against a custom base with two reviewers
+/create-pr -d -b develop -r alice -r bob
+```
+
+### How It Works
+
+1. **Branch Analysis**: Checks your current branch status and remote tracking
+2. **Change Detection**: Analyzes commits and diffs since the base branch
+3. **Content Generation**: Creates a PR with:
+   - Concise, descriptive title (imperative mood, <72 chars)
+   - Comprehensive description including:
+     - Summary of changes
+     - Detailed change list
+     - Motivation and context
+     - Testing information
+     - Additional notes
+4. **PR Creation**: Uses `gh pr create` to create the pull request
+5. **Result Display**: Shows the PR URL and summary
+
+### Permissions
+
+This plugin invokes the following local commands:
+
+- `git` — to inspect status, branches, commits, and diffs
+- `gh` — to create the pull request via GitHub CLI
+
+It relies on your existing `gh auth login` session and does not store credentials itself.
+
+### Example PR Description
+
+The plugin generates PRs with this structure:
+
+```markdown
+## Summary
+
+Brief overview of what this PR accomplishes
+
+## Changes
+
+- Key change or feature 1
+- Key change or feature 2
+- Key change or feature 3
+
+## Motivation
+
+Explanation of why these changes were needed
+
+## Testing
+
+- How the changes were tested
+- Test results or validation steps
+
+## Notes
+
+Any additional context, breaking changes, or reviewer notes
+```
 
 ## Contributing
 
