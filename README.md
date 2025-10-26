@@ -8,6 +8,7 @@ Included plugins:
 
 - [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
 - [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
+- [`git`](#git-plugin): Git workflow automation with git-flow style commit messages and automatic push.
 
 ## Features
 
@@ -27,6 +28,15 @@ Included plugins:
 - **Error Handling**: Provides clear error messages and actionable solutions
 - **GitHub Integration**: Seamlessly integrates with GitHub CLI (`gh`)
 
+### git Plugin
+
+- **Git-Flow Style Commits**: Automatically generates conventional commit messages following git-flow standards
+- **Smart Type Detection**: Analyzes changes to determine commit type (feat, fix, docs, etc.)
+- **Scope Suggestion**: Suggests appropriate scope based on changed files and directories
+- **Secret Scanning**: Scans for potential secrets before committing
+- **Auto-Push**: Optionally pushes commits to remote after committing
+- **Interactive Workflow**: Confirms each step before execution
+
 ## Prerequisites
 
 ### For statusline Plugin
@@ -43,6 +53,12 @@ Included plugins:
 - [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
 - A git repository with changes to create a PR from
 
+### For git Plugin
+
+- [Claude Code](https://claude.ai/download) installed
+- `git` installed and available in `PATH`
+- A git repository with changes to commit
+
 ## Installation
 
 ### From GitHub (Recommended)
@@ -53,6 +69,8 @@ Included plugins:
 /plugin install statusline@cc-marketplace
 # Install gh plugin
 /plugin install gh@cc-marketplace
+# Install git plugin
+/plugin install git@cc-marketplace
 ```
 
 ---
@@ -222,6 +240,172 @@ Explanation of why these changes were needed
 
 Any additional context, breaking changes, or reviewer notes
 ```
+
+---
+
+## git Plugin
+
+### Overview
+
+The git plugin automates the git commit workflow with git-flow style conventional commit messages. It analyzes your changes, generates appropriate commit messages, and optionally pushes to the remote repository.
+
+### Basic Usage
+
+Simply run the command in Claude Code:
+
+```bash
+/git:commit
+```
+
+The plugin will:
+
+1. Analyze your staged and unstaged changes
+2. Detect the appropriate commit type (feat, fix, docs, etc.)
+3. Suggest a scope based on changed files
+4. Generate a git-flow style commit message
+5. Ask for your confirmation
+6. Create the commit
+7. Push to remote (unless --no-push is specified)
+
+### Commit Types
+
+The plugin uses conventional commit types:
+
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Formatting, white-space, missing semi-colons, etc.
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Performance improvement
+- `test`: Adding or correcting tests
+- `chore`: Build process, tools, library updates
+- `ci`: CI/CD configuration changes
+
+### Flags
+
+- `--no-push`: Create the commit but don't push to remote
+- `--scope <scope>`: Manually specify the commit scope (e.g., "auth", "api")
+- `--type <type>`: Force a specific commit type instead of auto-detection
+
+Examples:
+
+```bash
+# Commit with auto-detection and push
+/git:commit
+
+# Commit without pushing
+/git:commit --no-push
+
+# Force a specific type and scope
+/git:commit --type feat --scope auth
+
+# Specify only the scope
+/git:commit --scope api
+```
+
+### Commit Message Format
+
+Generated commit messages follow the conventional commit format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+Example:
+
+```
+feat(auth): add OAuth2 authentication flow
+
+Implement OAuth2 authentication with Google and GitHub providers.
+Add token refresh mechanism and session management.
+
+Closes #123
+```
+
+### How It Works
+
+1. **Context Gathering**: Analyzes current branch, staged/unstaged changes, and recent commits
+2. **Change Analysis**: Determines commit type based on:
+   - Files changed (e.g., `*.md` files → `docs`)
+   - Content of diffs (e.g., test files → `test`)
+   - Directory structure (e.g., `.github/` → `ci`)
+3. **Scope Detection**: Suggests scope from:
+   - Package names (e.g., `packages/auth` → scope: `auth`)
+   - Directory names
+   - Module names
+4. **Secret Scanning**: Checks for potential secrets:
+   - API keys (AKIA, ghp_, sk-, etc.)
+   - Private keys
+   - Tokens and passwords
+   - Sensitive environment files
+5. **Staging**: Helps stage unstaged files if needed
+6. **Commit Creation**: Creates the commit with the generated message
+7. **Push**: Pushes to remote with appropriate upstream tracking
+
+### Security Features
+
+The plugin includes built-in secret scanning that checks for:
+
+- API keys and tokens
+- Private keys (RSA, SSH, etc.)
+- Passwords and credentials
+- Sensitive data patterns
+
+If suspicious content is detected, the plugin will:
+- Show a warning with masked snippets
+- Ask for explicit confirmation
+- Default to canceling the commit
+
+### Example Workflow
+
+```
+You: /git:commit
+
+Claude: I've analyzed your changes and detected the following:
+- Type: feat (new feature detected)
+- Scope: auth (based on packages/auth/ changes)
+- Files: 3 files changed, 45 insertions(+), 12 deletions(-)
+
+Proposed commit message:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+feat(auth): add OAuth2 authentication flow
+
+Implement OAuth2 authentication with Google and GitHub providers.
+Add token refresh mechanism and session management.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Would you like to proceed with this commit message? (yes/no/edit)
+
+You: yes
+
+Claude: ✓ Commit created successfully
+✓ Pushing to origin/your-branch...
+✓ Push completed
+
+Summary:
+- Commit: feat(auth): add OAuth2 authentication flow
+- Branch: your-branch
+- Files changed: 3
+- Push status: success
+```
+
+### Permissions
+
+This plugin invokes the following local commands:
+
+- `git status` — to inspect working tree status
+- `git diff` — to analyze changes
+- `git add` — to stage files
+- `git commit` — to create commits
+- `git push` — to push to remote
+- `git branch` — to get current branch
+- `git log` — to analyze recent commit patterns
+
+It does not store credentials and uses your existing git configuration.
 
 ## Contributing
 
