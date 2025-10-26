@@ -182,7 +182,7 @@ apply_color_per_word() {
 colored_quote=$(apply_color_per_word "$quote")
 
 # Build and print status line with emojis and colors
-printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%s\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
+printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
   "$branch" \
   "$model_display" \
   "$cost" \
