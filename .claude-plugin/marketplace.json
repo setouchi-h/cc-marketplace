@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "gh",
-      "source": "./",
+      "source": "./packages/gh",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
       "version": "1.0.0",
       "author": {
@@ -20,13 +20,21 @@
       "homepage": "https://github.com/setouchi-h/git-tools",
       "repository": "https://github.com/setouchi-h/git-tools",
       "license": "MIT",
-      "keywords": [
-        "pr",
-        "pull-request",
-        "github",
-        "git",
-        "automation"
-      ],
+      "keywords": ["pr", "pull-request", "github", "git", "automation"],
+      "category": "productivity"
+    },
+    {
+      "name": "statusline",
+      "source": "./packages/statusline",
+      "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Kazuki Hashimoto"
+      },
+      "homepage": "https://github.com/setouchi-h/git-tools",
+      "repository": "https://github.com/setouchi-h/git-tools",
+      "license": "MIT",
+      "keywords": ["claude", "statusline", "shell", "productivity"],
       "category": "productivity"
     }
   ]
