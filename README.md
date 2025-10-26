@@ -66,8 +66,6 @@ cd /path/to/cc-marketplace
 
 ## gh Plugin
 
-### Usage
-
 ### Basic Usage
 
 Simply run the command in Claude Code:
@@ -212,8 +210,6 @@ Add the status line to your Claude Code configuration by editing `~/.config/clau
 ```
 
 Or use the Claude Code settings UI to set the statusline command path.
-
-### Usage
 
 #### Install or Update
 
