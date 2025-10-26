@@ -1,0 +1,22 @@
+{
+  "name": "git",
+  "version": "1.0.0",
+  "description": "Git workflow automation tool with git-flow style commit messages and automatic push.",
+  "author": {
+    "name": "Kazuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
+  },
+  "homepage": "https://github.com/setouchi-h/cc-marketplace",
+  "repository": "https://github.com/setouchi-h/cc-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "commit",
+    "git-flow",
+    "conventional-commits",
+    "automation"
+  ],
+  "commands": [
+    "./commands/commit.md"
+  ]
+}
