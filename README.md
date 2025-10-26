@@ -6,8 +6,8 @@ This repository provides a Claude Code marketplace bundle (cc-marketplace).
 
 Included plugins:
 
-- `gh`: Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
-- `statusline`: Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
+- [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
+- [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
 
 ## Features
 
