@@ -1,6 +1,6 @@
 ---
 description: Analyze local git changes and create a structured GitHub pull request.
-argument-hint: "[-d|--draft] [-b <branch>] [-r <user> ...] [--no-push] [--assign-me]"
+argument-hint: "[-d|--draft] [-b <branch>] [-r <user> ...] [--no-push] [--no-assign]"
 allowed-tools:
   - Bash(git status:*)
   - Bash(git diff:*)
@@ -22,7 +22,7 @@ Parse the arguments provided to this command (`$ARGUMENTS`) and support these fl
 - `--base <branch>`, `-b <branch>`: base branch. If omitted, detect the default branch.
 - `--reviewer <user>`, `-r <user>`: may appear multiple times; add each as reviewer.
 - `--no-push`: do not push the branch before creating the PR.
-- `--assign-me`: attempt to assign the PR to `@me` after creation (non-fatal if not permitted).
+- `--no-assign`: skip assigning the PR to yourself (by default, PRs are assigned to `@me`).
 
 ## Context Gathering
 
@@ -82,7 +82,7 @@ Build the `gh pr create` command with the resolved options and show it before ex
 - `--reviewer <user>` per reviewer occurrence
 - `--title <title>` and `--body <body>` (prefer `--body` inline; if the content is large, write to a temp file and use `--body-file`)
 
-Execute the command and capture the resulting PR URL or number. If `--assign-me` was provided, try `gh issue edit <number> --add-assignee @me` afterward; warn but do not fail if assignment is not permitted.
+Execute the command and capture the resulting PR URL or number. Unless `--no-assign` was provided, try `gh issue edit <number> --add-assignee @me` afterward; warn but do not fail if assignment is not permitted.
 
 ## Output
 
