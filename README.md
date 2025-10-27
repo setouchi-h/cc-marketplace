@@ -6,7 +6,7 @@ This repository provides a Claude Code marketplace bundle (cc-marketplace).
 
 Included plugins:
 
-- [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
+- [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.
 - [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
 - [`git`](#git-plugin): Git workflow automation with git-flow style commit messages and automatic push.
 
@@ -16,9 +16,10 @@ Included plugins:
 
 - **Rich Session Info**: Displays branch, model, cost, duration, and line changes
 - **Real-time Updates**: Updates as you work in your Claude Code session
-- **Inspiring Quotes**: Shows a new programming quote every 5 minutes (cached)
+- **Inspiring Quotes**: Shows a new programming quote every 5 minutes (cached, can be disabled with `--no-quotes`)
 - **Color-Coded Display**: Uses emojis and colors for easy visual parsing
 - **Offline Support**: Gracefully falls back when offline
+- **Customizable Display**: Optional `--no-quotes` flag for a cleaner, quote-free status line
 
 ### gh Plugin
 
@@ -128,6 +129,48 @@ Test the status line without starting a full session:
 ```
 
 This renders a sample status line using mock data to verify colors and layout.
+
+### Configuration Options
+
+#### Disabling Quotes
+
+If you prefer a cleaner status line without inspirational quotes, you can disable them by adding the `--no-quotes` flag:
+
+1. Open `~/.claude/settings.json`
+2. Update the `statusLine` command:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline.sh --no-quotes"
+  }
+}
+```
+
+3. Restart Claude Code or start a new session
+
+With `--no-quotes`, the status line will display:
+```
+🌿 branch | 🤖 Model | 💰 $0.0123 | ⏱️ 1m49s | 📝 +10/-2
+```
+
+Without `--no-quotes` (default), it includes an inspirational quote:
+```
+🌿 branch | 🤖 Model | 💰 $0.0123 | ⏱️ 1m49s | 📝 +10/-2 | 💬 "Code is poetry" - Anonymous
+```
+
+#### Testing the Configuration
+
+Preview the status line with or without quotes:
+
+```bash
+# With quotes (default)
+/statusline:preview-statusline
+
+# Without quotes
+/statusline:preview-statusline --no-quotes
+```
 
 ### How It Works
 
