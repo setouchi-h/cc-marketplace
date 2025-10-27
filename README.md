@@ -179,7 +179,7 @@ The plugin will:
 - `-b, --base <branch>`: Use an alternate base branch. Defaults to the repository's default branch (commonly `main` or `master`).
 - `-r, --reviewer <user>`: Add a GitHub username as a reviewer. Repeat the flag to add multiple reviewers.
 - `--no-push`: Skip pushing the current branch before creating the PR.
-- `--assign-me`: Attempt to assign the PR to the authenticated user (`@me`). Assignment happens after the PR is created; if assignment isn't permitted, a warning is shown and PR creation still succeeds.
+- `--no-assign`: Skip assigning the PR to yourself. By default, the PR is assigned to the authenticated user (`@me`). Assignment happens after the PR is created; if assignment isn't permitted, a warning is shown and PR creation still succeeds.
 
 Examples with short flags:
 
