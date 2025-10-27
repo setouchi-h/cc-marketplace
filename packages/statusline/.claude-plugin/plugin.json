@@ -1,7 +1,7 @@
 {
   "name": "statusline",
   "version": "1.0.0",
-  "description": "Installs a status line script for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
+  "description": "Installs a status line script for Claude Code showing branch, model, cost, duration, diff lines, and a quote. Supports --no-quotes option to disable quote display.",
   "author": {
     "name": "Kazuki Hashimoto",
     "email": "setouchi.develop@gmail.com"

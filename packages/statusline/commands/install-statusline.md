@@ -1,5 +1,5 @@
 ---
-description: Install the Claude Code status line shell script to ~/.claude/scripts/statusline.sh
+description: Install the Claude Code status line shell script to ~/.claude/scripts/statusline.sh. The script can be configured with --no-quotes to disable quote display.
 argument-hint: "[--force]"
 allowed-tools:
   - Bash(mkdir:*)
@@ -16,6 +16,19 @@ allowed-tools:
 # Install Statusline
 
 This command writes a shell script to `~/.claude/scripts/statusline.sh` that renders a rich status line for Claude Code sessions (branch, model, cost, duration, lines changed, and a quote).
+
+## Usage
+
+The installed script supports the `--no-quotes` option to disable quote display:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline.sh --no-quotes"
+  }
+}
+```
 
 ## Behavior
 
@@ -46,6 +59,18 @@ tee ~/.claude/scripts/statusline.sh >/dev/null <<'EOF'
 
 # Status line script for Claude Code
 # Displays: Branch, Model, Cost, Duration, Lines changed, and a quote
+# Usage: statusline.sh [--no-quotes]
+
+# Parse command-line arguments
+SHOW_QUOTES=true
+for arg in "$@"; do
+  case $arg in
+    --no-quotes)
+      SHOW_QUOTES=false
+      shift
+      ;;
+  esac
+done
 
 # Check if jq is installed
 if ! command -v jq >/dev/null 2>&1; then
@@ -155,7 +180,10 @@ get_quote() {
   echo "$fallback_quote"
 }
 
-quote=$(get_quote)
+# Fetch quote if enabled
+if [ "$SHOW_QUOTES" = true ]; then
+  quote=$(get_quote)
+fi
 
 # Prepare model display string (include ID only if available)
 if [ -n "$model_id" ] && [ "$model_id" != "null" ]; then
@@ -184,17 +212,26 @@ apply_color_per_word() {
   echo -n "${result% }"
 }
 
-colored_quote=$(apply_color_per_word "$quote")
-
 # Build and print status line with emojis and colors
-printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
-  "$branch" \
-  "$model_display" \
-  "$cost" \
-  "$duration_str" \
-  "$lines_added" \
-  "$lines_removed" \
-  "$colored_quote"
+if [ "$SHOW_QUOTES" = true ]; then
+  colored_quote=$(apply_color_per_word "$quote")
+  printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
+    "$branch" \
+    "$model_display" \
+    "$cost" \
+    "$duration_str" \
+    "$lines_added" \
+    "$lines_removed" \
+    "$colored_quote"
+else
+  printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m" \
+    "$branch" \
+    "$model_display" \
+    "$cost" \
+    "$duration_str" \
+    "$lines_added" \
+    "$lines_removed"
+fi
 EOF
 chmod +x ~/.claude/scripts/statusline.sh
 ```
@@ -253,6 +290,7 @@ fi
 ## Notes
 
 - The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback.
+- To disable quote display, pass the `--no-quotes` option to the script. Update your `~/.claude/settings.json` with: `"command": "bash ~/.claude/scripts/statusline.sh --no-quotes"`
 - The command automatically updates `~/.claude/settings.json` to enable the status line. Use `--force` to overwrite existing configurations.
 - A backup of the previous settings is saved to `~/.claude/settings.json.backup`. Restore with `mv ~/.claude/settings.json.backup ~/.claude/settings.json` if needed.
 - To test locally, see the separate "Preview Statusline" command.

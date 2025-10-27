@@ -1,5 +1,6 @@
 ---
-description: Preview the status line by piping sample JSON into ~/.claude/scripts/statusline.sh
+description: Preview the status line by piping sample JSON into ~/.claude/scripts/statusline.sh. Supports --no-quotes option.
+argument-hint: "[--no-quotes]"
 allowed-tools:
   - Bash(test:*)
   - Bash(echo:*)
@@ -42,4 +43,30 @@ JSON
 ```
 
 You should see a single status line printed with colored fields and a quote.
+
+3) To preview without quotes, pass the `--no-quotes` option:
+
+- Run:
+
+```
+cat <<'JSON' | ~/.claude/scripts/statusline.sh --no-quotes
+{
+  "cost": {
+    "total_cost_usd": 0.0123,
+    "total_duration_ms": 6543,
+    "total_lines_added": 10,
+    "total_lines_removed": 2
+  },
+  "model": {
+    "display_name": "Sonnet 4.5",
+    "id": "claude-sonnet-4-5-20250929"
+  },
+  "workspace": {
+    "project_dir": "$(pwd)"
+  }
+}
+JSON
+```
+
+You should see the status line without the quote section.
 
