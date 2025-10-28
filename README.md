@@ -90,7 +90,7 @@ The status line shows:
 - 💰 **Cost**: Total session cost in USD (e.g., `$0.0123`)
 - ⏱️ **Duration**: Session duration in minutes/seconds (e.g., `1m49s`)
 - 📝 **Changes**: Lines added/removed (e.g., `+10/-2`)
-- 💬 **Quote**: Random quote (refreshed every 5 minutes)
+- 💬 **Quote (optional)**: Random quote (refreshed every 5 minutes)
 
 Example output:
 
