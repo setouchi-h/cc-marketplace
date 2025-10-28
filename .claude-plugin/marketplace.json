@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A marketplace bundle for PR creation and management tools.",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
@@ -26,8 +26,8 @@
     {
       "name": "statusline",
       "source": "./packages/statusline",
-      "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.",
-      "version": "1.0.0",
+      "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.",
+      "version": "1.1.0",
       "author": {
         "name": "Kazuki Hashimoto"
       },
