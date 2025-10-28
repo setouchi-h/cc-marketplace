@@ -1,6 +1,6 @@
 ---
 description: Install the Claude Code status line shell script to ~/.claude/scripts/statusline.sh
-argument-hint: "[--force]"
+argument-hint: "[--force] [--no-quotes]"
 allowed-tools:
   - Bash(mkdir:*)
   - Bash(tee:*)
@@ -15,7 +15,7 @@ allowed-tools:
 
 # Install Statusline
 
-This command writes a shell script to `~/.claude/scripts/statusline.sh` that renders a rich status line for Claude Code sessions (branch, model, cost, duration, lines changed, and a quote).
+This command writes a shell script to `~/.claude/scripts/statusline.sh` that renders a rich status line for Claude Code sessions (branch, model, cost, duration, lines changed, and optionally a quote).
 
 ## Behavior
 
@@ -23,6 +23,7 @@ This command writes a shell script to `~/.claude/scripts/statusline.sh` that ren
 - Ensures the `~/.claude/scripts` directory exists and sets the script executable.
 - Verifies `jq` is available (required by the script) and warns if missing.
 - Automatically configures `~/.claude/settings.json` to enable the status line.
+- Supports `--no-quotes` to hide the quote from the status line.
 - If `statusLine` is already configured and `--force` is not provided, skips configuration update.
 
 ## Steps
@@ -40,12 +41,30 @@ This command writes a shell script to `~/.claude/scripts/statusline.sh` that ren
 - Run:
 
 ```
-test -f ~/.claude/scripts/statusline.sh && [ "$ARGUMENTS" != "--force" ] && echo "~/.claude/scripts/statusline.sh already exists. Re-run with --force to overwrite." && exit 0 || true
+test -f ~/.claude/scripts/statusline.sh \
+  && ! echo "$ARGUMENTS" | grep -q -- '--force' \
+  && echo "~/.claude/scripts/statusline.sh already exists. Re-run with --force to overwrite." \
+  && exit 0 || true
 tee ~/.claude/scripts/statusline.sh >/dev/null <<'EOF'
 #!/usr/bin/env bash
 
 # Status line script for Claude Code
-# Displays: Branch, Model, Cost, Duration, Lines changed, and a quote
+# Displays: Branch, Model, Cost, Duration, Lines changed, and an optional quote
+
+# Parse flags
+NO_QUOTES=0
+for arg in "$@"; do
+  case "$arg" in
+    --no-quotes)
+      NO_QUOTES=1
+      ;;
+  esac
+done
+
+# Also allow env toggle for flexibility
+if [ "${CLAUDE_STATUSLINE_NO_QUOTES:-}" = "1" ]; then
+  NO_QUOTES=1
+fi
 
 # Check if jq is installed
 if ! command -v jq >/dev/null 2>&1; then
@@ -98,64 +117,66 @@ else
   duration_str="0s"
 fi
 
-# Fetch quote with 5-minute caching
-get_quote() {
-  local cache_file="/tmp/claude_statusline_quote.txt"
-  local cache_max_age=300  # 5 minutes in seconds
-  local fallback_quote="\"Code is poetry\" - Anonymous"
+if [ "$NO_QUOTES" -ne 1 ]; then
+  # Fetch quote with 5-minute caching
+  get_quote() {
+    local cache_file="/tmp/claude_statusline_quote.txt"
+    local cache_max_age=300  # 5 minutes in seconds
+    local fallback_quote="\"Code is poetry\" - Anonymous"
 
-  # Check if cache exists and is fresh (less than 5 minutes old)
-  if [ -f "$cache_file" ]; then
-    # Portable mtime check: GNU `stat -c %Y` first, then BSD `stat -f %m`.
-    # Avoid inline arithmetic with command substitution to prevent multi-line issues.
-    local now mtime cache_age
-    now=$(date +%s)
-    if mtime=$(stat -c %Y "$cache_file" 2>/dev/null); then
-      :
-    else
-      mtime=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+    # Check if cache exists and is fresh (less than 5 minutes old)
+    if [ -f "$cache_file" ]; then
+      # Portable mtime check: GNU `stat -c %Y` first, then BSD `stat -f %m`.
+      # Avoid inline arithmetic with command substitution to prevent multi-line issues.
+      local now mtime cache_age
+      now=$(date +%s)
+      if mtime=$(stat -c %Y "$cache_file" 2>/dev/null); then
+        :
+      else
+        mtime=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+      fi
+      # Ensure numeric value (defensive in case of unexpected output)
+      mtime=${mtime//[^0-9]/}
+      [ -z "$mtime" ] && mtime=0
+      cache_age=$(( now - mtime ))
+
+      # Use cached quote if it's less than 5 minutes old
+      if [ "$cache_age" -lt "$cache_max_age" ]; then
+        cat "$cache_file"
+        return 0
+      fi
     fi
-    # Ensure numeric value (defensive in case of unexpected output)
-    mtime=${mtime//[^0-9]/}
-    [ -z "$mtime" ] && mtime=0
-    cache_age=$(( now - mtime ))
 
-    # Use cached quote if it's less than 5 minutes old
-    if [ "$cache_age" -lt "$cache_max_age" ]; then
+    # Cache is stale or doesn't exist - try to fetch new quote from API
+    local api_response=$(curl -s --max-time 2 "https://zenquotes.io/api/random" 2>/dev/null)
+    local curl_exit_code=$?
+
+    if [ $curl_exit_code -eq 0 ] && [ -n "$api_response" ]; then
+      # Parse the JSON response (ZenQuotes returns an array, so use .[0])
+      local quote_text=$(echo "$api_response" | jq -r '.[0].q // empty' 2>/dev/null)
+      local quote_author=$(echo "$api_response" | jq -r '.[0].a // "Unknown"' 2>/dev/null)
+
+      if [ -n "$quote_text" ] && [ "$quote_text" != "null" ] && [ "$quote_text" != "empty" ]; then
+        # Format quote and save to cache
+        local formatted_quote="\"$quote_text\" - $quote_author"
+        echo "$formatted_quote" > "$cache_file"
+        echo "$formatted_quote"
+        return 0
+      fi
+    fi
+
+    # API failed - try to use old cached quote as fallback
+    if [ -f "$cache_file" ]; then
       cat "$cache_file"
       return 0
     fi
-  fi
 
-  # Cache is stale or doesn't exist - try to fetch new quote from API
-  local api_response=$(curl -s --max-time 2 "https://zenquotes.io/api/random" 2>/dev/null)
-  local curl_exit_code=$?
+    # No cache available, use fallback
+    echo "$fallback_quote"
+  }
 
-  if [ $curl_exit_code -eq 0 ] && [ -n "$api_response" ]; then
-    # Parse the JSON response (ZenQuotes returns an array, so use .[0])
-    local quote_text=$(echo "$api_response" | jq -r '.[0].q // empty' 2>/dev/null)
-    local quote_author=$(echo "$api_response" | jq -r '.[0].a // "Unknown"' 2>/dev/null)
-
-    if [ -n "$quote_text" ] && [ "$quote_text" != "null" ] && [ "$quote_text" != "empty" ]; then
-      # Format quote and save to cache
-      local formatted_quote="\"$quote_text\" - $quote_author"
-      echo "$formatted_quote" > "$cache_file"
-      echo "$formatted_quote"
-      return 0
-    fi
-  fi
-
-  # API failed - try to use old cached quote as fallback
-  if [ -f "$cache_file" ]; then
-    cat "$cache_file"
-    return 0
-  fi
-
-  # No cache available, use fallback
-  echo "$fallback_quote"
-}
-
-quote=$(get_quote)
+  quote=$(get_quote)
+fi
 
 # Prepare model display string (include ID only if available)
 if [ -n "$model_id" ] && [ "$model_id" != "null" ]; then
@@ -184,17 +205,27 @@ apply_color_per_word() {
   echo -n "${result% }"
 }
 
-colored_quote=$(apply_color_per_word "$quote")
-
-# Build and print status line with emojis and colors
-printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
-  "$branch" \
-  "$model_display" \
-  "$cost" \
-  "$duration_str" \
-  "$lines_added" \
-  "$lines_removed" \
-  "$colored_quote"
+if [ "$NO_QUOTES" -ne 1 ]; then
+  colored_quote=$(apply_color_per_word "$quote")
+  # Build and print status line with emojis, colors, and quote
+  printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m | 💬 %b" \
+    "$branch" \
+    "$model_display" \
+    "$cost" \
+    "$duration_str" \
+    "$lines_added" \
+    "$lines_removed" \
+    "$colored_quote"
+else
+  # Print without quote segment
+  printf "🌿 \033[1;92m%s\033[0m | 🤖 \033[1;96m%b\033[0m | 💰 \033[1;93m\$%.4f\033[0m | ⏱️ \033[1;97m%s\033[0m | 📝 \033[1;92m+%s\033[0m/\033[1;91m-%s\033[0m" \
+    "$branch" \
+    "$model_display" \
+    "$cost" \
+    "$duration_str" \
+    "$lines_added" \
+    "$lines_removed"
+fi
 EOF
 chmod +x ~/.claude/scripts/statusline.sh
 ```
@@ -229,7 +260,8 @@ if ! jq empty ~/.claude/settings.json >/dev/null 2>&1; then
 fi
 
 # Then check for existing statusLine configuration
-if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 && [ "$ARGUMENTS" != "--force" ]; then
+if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 \
+   && ! echo "$ARGUMENTS" | grep -q -- '--force'; then
   echo "statusLine already configured in ~/.claude/settings.json (use --force to overwrite)"
 else
   # Add or update statusLine configuration with backup + error handling
@@ -237,7 +269,13 @@ else
   tmp_file=$(mktemp ~/.claude/settings.json.tmp.XXXXXX)
   trap 'rm -f "$tmp_file"' EXIT
 
-  if ! jq '.statusLine = {"type": "command", "command": "bash ~/.claude/scripts/statusline.sh"}' \
+  # Prepare command, optionally including --no-quotes
+  status_cmd="bash ~/.claude/scripts/statusline.sh"
+  if echo "$ARGUMENTS" | grep -q -- '--no-quotes'; then
+    status_cmd="$status_cmd --no-quotes"
+  fi
+
+  if ! jq --arg cmd "$status_cmd" '.statusLine = {"type": "command", "command": $cmd}' \
        ~/.claude/settings.json > "$tmp_file"; then
     echo "Error: Failed to update settings.json. Backup preserved at ~/.claude/settings.json.backup" >&2
     rm -f "$tmp_file"
@@ -252,7 +290,7 @@ fi
 
 ## Notes
 
-- The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback.
+- The script expects JSON input from Claude Code and requires `jq` at runtime. Quotes are fetched via `curl` with a 5-minute cache and a graceful offline fallback. Use `--no-quotes` (or set env `CLAUDE_STATUSLINE_NO_QUOTES=1`) to hide quotes entirely.
 - The command automatically updates `~/.claude/settings.json` to enable the status line. Use `--force` to overwrite existing configurations.
 - A backup of the previous settings is saved to `~/.claude/settings.json.backup`. Restore with `mv ~/.claude/settings.json.backup ~/.claude/settings.json` if needed.
 - To test locally, see the separate "Preview Statusline" command.

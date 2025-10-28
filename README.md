@@ -6,7 +6,7 @@ This repository provides a Claude Code marketplace bundle (cc-marketplace).
 
 Included plugins:
 
-- [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and a quote.
+- [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.
 - [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
 - [`git`](#git-plugin): Git workflow automation with git-flow style commit messages and automatic push.
 
@@ -16,7 +16,7 @@ Included plugins:
 
 - **Rich Session Info**: Displays branch, model, cost, duration, and line changes
 - **Real-time Updates**: Updates as you work in your Claude Code session
-- **Inspiring Quotes**: Shows a new programming quote every 5 minutes (cached)
+- **Inspiring Quotes (optional)**: Shows a new quote every 5 minutes (cached). Disable with `--no-quotes`.
 - **Color-Coded Display**: Uses emojis and colors for easy visual parsing
 - **Offline Support**: Gracefully falls back when offline
 
@@ -79,7 +79,7 @@ Included plugins:
 
 ### Overview
 
-The statusline plugin installs a customizable status line script that displays rich information about your Claude Code session. It shows the current git branch, AI model, session cost, duration, changed lines, and an inspiring programming quote.
+The statusline plugin installs a customizable status line script that displays rich information about your Claude Code session. It shows the current git branch, AI model, session cost, duration, changed lines, and optionally a quote.
 
 ### What It Displays
 
@@ -90,7 +90,7 @@ The status line shows:
 - 💰 **Cost**: Total session cost in USD (e.g., `$0.0123`)
 - ⏱️ **Duration**: Session duration in minutes/seconds (e.g., `1m49s`)
 - 📝 **Changes**: Lines added/removed (e.g., `+10/-2`)
-- 💬 **Quote**: Random programming quote (refreshed every 5 minutes)
+- 💬 **Quote**: Random quote (refreshed every 5 minutes)
 
 Example output:
 
@@ -119,6 +119,13 @@ This command:
 - Makes the script executable
 - Automatically configures `~/.claude/settings.json` to enable the status line
 
+Disable quotes at install time:
+
+```bash
+/statusline:install-statusline --no-quotes
+```
+This writes `bash ~/.claude/scripts/statusline.sh --no-quotes` into `~/.claude/settings.json` so the quote section is hidden.
+
 #### Preview the Status Line
 
 Test the status line without starting a full session:
@@ -138,7 +145,7 @@ This renders a sample status line using mock data to verify colors and layout.
    - Model name and ID
    - Workspace directory
 3. **Git Branch**: Detects the current git branch from the workspace
-4. **Quote Fetching**:
+4. **Quote Fetching (if enabled)**:
    - Fetches a random quote from [ZenQuotes API](https://zenquotes.io/)
    - Caches quotes for 5 minutes to reduce API calls
    - Falls back to cached or default quotes when offline
@@ -152,6 +159,27 @@ This renders a sample status line using mock data to verify colors and layout.
   - Windows: Download from [jqlang.github.io](https://jqlang.github.io/jq/download/)
 - **curl**: Optional, for fetching quotes (degrades gracefully if unavailable)
 - **git**: Optional, for displaying branch name
+
+#### Hide Quotes Later (without reinstall)
+
+- Temporary: set an environment variable when running the script directly or via preview:
+
+```bash
+CLAUDE_STATUSLINE_NO_QUOTES=1 ~/.claude/scripts/statusline.sh
+```
+
+- Persistent: add `--no-quotes` to the command in `~/.claude/settings.json`, e.g.:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline.sh --no-quotes"
+  }
+}
+```
+
+You can also rerun the installer with `--force --no-quotes` to update the configuration automatically.
 
 ---
 
