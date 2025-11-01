@@ -266,7 +266,7 @@ if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 \
 else
   # Add or update statusLine configuration with backup + error handling
   cp -p ~/.claude/settings.json ~/.claude/settings.json.backup
-  tmp_file=$(mktemp ~/.claude/settings.json.tmp.XXXXXX)
+  tmp_file=$(mktemp -p ~/.claude settings.json.tmp.XXXXXX)
   trap 'rm -f "$tmp_file"' EXIT
 
   # Prepare command, optionally including --no-quotes
