@@ -27,7 +27,7 @@
       "name": "statusline",
       "source": "./packages/statusline",
       "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "Kazuki Hashimoto"
       },
@@ -48,7 +48,13 @@
       "homepage": "https://github.com/setouchi-h/cc-marketplace",
       "repository": "https://github.com/setouchi-h/cc-marketplace",
       "license": "MIT",
-      "keywords": ["git", "commit", "git-flow", "conventional-commits", "automation"],
+      "keywords": [
+        "git",
+        "commit",
+        "git-flow",
+        "conventional-commits",
+        "automation"
+      ],
       "category": "productivity"
     }
   ]
