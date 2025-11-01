@@ -282,6 +282,19 @@ else
     exit 1
   fi
 
+  # Verify the generated file is not empty and contains valid JSON
+  if [ ! -s "$tmp_file" ]; then
+    echo "Error: Generated settings.json is empty. Backup preserved at ~/.claude/settings.json.backup" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
+
+  if ! jq empty "$tmp_file" >/dev/null 2>&1; then
+    echo "Error: Generated settings.json contains invalid JSON. Backup preserved at ~/.claude/settings.json.backup" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
+
   mv "$tmp_file" ~/.claude/settings.json
   trap - EXIT
   echo "Configured statusLine in ~/.claude/settings.json (backup at ~/.claude/settings.json.backup)"
