@@ -266,7 +266,7 @@ if jq -e '.statusLine' ~/.claude/settings.json >/dev/null 2>&1 \
 else
   # Add or update statusLine configuration with backup + error handling
   cp -p ~/.claude/settings.json ~/.claude/settings.json.backup
-  tmp_file=$(mktemp -p ~/.claude settings.json.tmp.XXXXXX)
+  tmp_file=$(mktemp ~/.claude/settings.json.tmp.XXXXXX)
   trap 'rm -f "$tmp_file"' EXIT
 
   # Prepare command, optionally including --no-quotes
@@ -278,6 +278,19 @@ else
   if ! jq --arg cmd "$status_cmd" '.statusLine = {"type": "command", "command": $cmd}' \
        ~/.claude/settings.json > "$tmp_file"; then
     echo "Error: Failed to update settings.json. Backup preserved at ~/.claude/settings.json.backup" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
+
+  # Verify the generated file is not empty and contains valid JSON
+  if [ ! -s "$tmp_file" ]; then
+    echo "Error: Generated settings.json is empty. Backup preserved at ~/.claude/settings.json.backup" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
+
+  if ! jq empty "$tmp_file" >/dev/null 2>&1; then
+    echo "Error: Generated settings.json contains invalid JSON. Backup preserved at ~/.claude/settings.json.backup" >&2
     rm -f "$tmp_file"
     exit 1
   fi
