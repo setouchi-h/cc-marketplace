@@ -1,10 +1,6 @@
 ---
 description: Preview the status line by piping sample JSON into ~/.claude/scripts/statusline.sh (supports --no-quotes)
-allowed-tools:
-  - Bash(test:*)
-  - Bash(echo:*)
-  - Bash(pwd:*)
-  - Bash(cat:*)
+allowed-tools: [Bash(test:*), Bash(echo:*), Bash(pwd:*), Bash(cat:*)]
 ---
 
 # Preview Statusline

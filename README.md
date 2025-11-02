@@ -8,7 +8,7 @@ Included plugins:
 
 - [`statusline`](#statusline-plugin): Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.
 - [`gh`](#gh-plugin): Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests automatically.
-- [`git`](#git-plugin): Git workflow automation with git-flow style commit messages and automatic push.
+- [`git`](#git-plugin): Git workflow automation with git-flow style branch creation and commit messages.
 
 ## Features
 
@@ -30,11 +30,13 @@ Included plugins:
 
 ### git Plugin
 
+- **Git-Flow Branch Creation**: Automatically creates appropriate git-flow branches (feature/bugfix/hotfix/release) based on task descriptions
+- **Intelligent Branch Naming**: Generates clean, descriptive branch names automatically
 - **Git-Flow Style Commits**: Automatically generates conventional commit messages following git-flow standards
 - **Smart Type Detection**: Analyzes changes to determine commit type (feat, fix, docs, etc.)
 - **Scope Suggestion**: Suggests appropriate scope based on changed files and directories
 - **Secret Scanning**: Scans for potential secrets before committing
-- **Auto-Push**: Optionally pushes commits to remote after committing
+- **Auto-Push**: Optionally pushes branches and commits to remote
 - **Interactive Workflow**: Confirms each step before execution
 
 ## Prerequisites
@@ -275,18 +277,69 @@ Any additional context, breaking changes, or reviewer notes
 
 ### Overview
 
-The git plugin automates the git commit workflow with git-flow style conventional commit messages. It analyzes your changes, generates appropriate commit messages, and optionally pushes to the remote repository.
+The git plugin automates git workflows with git-flow style operations:
+- Create git-flow branches (feature/bugfix/hotfix/release) based on task descriptions
+- Generate conventional commit messages and push changes automatically
 
-### Basic Usage
+### Commands
 
-Simply run the command in Claude Code:
+The git plugin provides two main commands:
 
+#### 1. Create Branch (`/git:create-branch`)
+
+Create a new git-flow style branch based on your task description.
+
+**Usage:**
 ```bash
-/git:commit
+/git:create-branch "add user authentication"
+/git:create-branch "fix login error" --base main
+/git:create-branch "critical security patch" --type hotfix --no-push
 ```
 
-The plugin will:
+**The command will:**
+1. Analyze the task description to determine branch type (feature/bugfix/hotfix/release)
+2. Generate a clean, descriptive branch name
+3. Create the branch from the appropriate base (develop/main/master)
+4. Optionally push to remote
 
+**Branch Types:**
+- `feature/`: New features or enhancements
+- `bugfix/`: Bug fixes for the next release
+- `hotfix/`: Critical fixes for production
+- `release/`: Release preparation
+
+**Flags:**
+- `--base <branch>`: Specify base branch (default: auto-detect develop/main/master)
+- `--type <type>`: Force branch type (feature/bugfix/hotfix/release)
+- `--no-push`: Don't push the branch to remote
+
+**Examples:**
+```bash
+# Feature branch with auto-detection
+/git:create-branch "add OAuth2 authentication"
+# Result: feature/add-oauth2-authentication
+
+# Bugfix from specific base
+/git:create-branch "fix login crash on mobile" --base main
+# Result: bugfix/fix-login-crash-mobile
+
+# Hotfix without pushing
+/git:create-branch "security vulnerability in API" --type hotfix --no-push
+# Result: hotfix/security-vulnerability-api
+```
+
+#### 2. Commit (`/git:commit`)
+
+Analyze changes, create a git-flow style commit message, and push.
+
+**Usage:**
+```bash
+/git:commit
+/git:commit --no-push
+/git:commit --type feat --scope auth
+```
+
+**The command will:**
 1. Analyze your staged and unstaged changes
 2. Detect the appropriate commit type (feat, fix, docs, etc.)
 3. Suggest a scope based on changed files
@@ -295,10 +348,7 @@ The plugin will:
 6. Create the commit
 7. Push to remote (unless --no-push is specified)
 
-### Commit Types
-
-The plugin uses conventional commit types:
-
+**Commit Types:**
 - `feat`: A new feature
 - `fix`: A bug fix
 - `docs`: Documentation only changes
@@ -309,29 +359,12 @@ The plugin uses conventional commit types:
 - `chore`: Build process, tools, library updates
 - `ci`: CI/CD configuration changes
 
-### Flags
-
+**Flags:**
 - `--no-push`: Create the commit but don't push to remote
 - `--scope <scope>`: Manually specify the commit scope (e.g., "auth", "api")
 - `--type <type>`: Force a specific commit type instead of auto-detection
 
-Examples:
-
-```bash
-# Commit with auto-detection and push
-/git:commit
-
-# Commit without pushing
-/git:commit --no-push
-
-# Force a specific type and scope
-/git:commit --type feat --scope auth
-
-# Specify only the scope
-/git:commit --scope api
-```
-
-### Commit Message Format
+**Commit Message Format:**
 
 Generated commit messages follow the conventional commit format:
 

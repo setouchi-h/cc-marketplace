@@ -1,14 +1,7 @@
 ---
 description: Analyze local git changes and create a structured GitHub pull request.
 argument-hint: "[-d|--draft] [-b <branch>] [-r <user> ...] [--no-push] [--no-assign]"
-allowed-tools:
-  - Bash(git status:*)
-  - Bash(git diff:*)
-  - Bash(git branch:*)
-  - Bash(git rev-parse:*)
-  - Bash(git rev-list:*)
-  - Bash(gh:*)
-  - Bash(git push:*)
+allowed-tools: [Bash(git status:*), Bash(git diff:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git rev-list:*), Bash(gh:*), Bash(git push:*), Bash(git ls-remote:*), Bash(git symbolic-ref:*), Bash(awk:*), Bash(sed:*)]
 ---
 
 # Create Pull Request
@@ -92,4 +85,3 @@ Print:
 - Reviewers added (if any)
 
 If any step fails, report the exact command and stderr, provide a short diagnosis, and suggest concrete next steps.
-
