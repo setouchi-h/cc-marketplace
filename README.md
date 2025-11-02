@@ -57,16 +57,42 @@ The statusline plugin displays rich session information in your Claude Code prom
 The installer creates `~/.claude/scripts/statusline.sh` and automatically configures your `~/.claude/settings.json`.
 
 ### gh
+
+Create pull requests with intelligent analysis.
+
 ```bash
 /gh:create-pr                         # Create PR from current branch
 /gh:create-pr -d -b develop          # Draft PR against develop
+/gh:create-pr -r alice -r bob        # Add reviewers
 ```
 
+**Flags:**
+- `-d, --draft`: Create as draft PR
+- `-b, --base <branch>`: Specify base branch (default: repo default)
+- `-r, --reviewer <user>`: Add reviewer (repeat for multiple)
+- `--no-push`: Skip pushing branch
+- `--no-assign`: Skip self-assignment
+
 ### git
+
+Git-flow workflow automation with branch creation and conventional commits.
+
 ```bash
 /git:create-branch "task description" # Create git-flow branch
+/git:create-branch "fix bug" --type bugfix --base main
 /git:commit                           # Conventional commit with auto-detection
+/git:commit --type feat --scope auth --no-push
 ```
+
+**create-branch flags:**
+- `--base <branch>`: Specify base branch (default: auto-detect)
+- `--type <type>`: Force branch type (feature/bugfix/hotfix/release)
+- `--no-push`: Don't push to remote
+
+**commit flags:**
+- `--type <type>`: Force commit type (feat/fix/docs/etc.)
+- `--scope <scope>`: Specify commit scope
+- `--no-push`: Don't push to remote
 
 ## License
 
