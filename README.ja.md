@@ -25,6 +25,8 @@ Claude Code マーケットプレイスバンドル（開発必須プラグイ�
 
 Claude Code のプロンプトに豊富なセッション情報を表示するプラグインです。
 
+![Statusline Example](assets/statusline.png)
+
 **表示内容:**
 - 🌿 現在の git ブランチ
 - 🤖 AI モデル（例: Sonnet 4.5）

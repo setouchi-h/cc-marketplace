@@ -25,6 +25,8 @@ Claude Code marketplace bundle with essential development plugins.
 
 The statusline plugin displays rich session information in your Claude Code prompt.
 
+![Statusline Example](assets/statusline.png)
+
 **What it shows:**
 - 🌿 Current git branch
 - 🤖 AI model (e.g., Sonnet 4.5)
