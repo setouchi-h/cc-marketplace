@@ -1,16 +1,7 @@
 ---
 description: Install the Claude Code status line shell script to ~/.claude/scripts/statusline.sh
 argument-hint: "[--force] [--no-quotes]"
-allowed-tools:
-  - Bash(mkdir:*)
-  - Bash(tee:*)
-  - Bash(chmod:*)
-  - Bash(which:*)
-  - Bash(echo:*)
-  - Bash(test:*)
-  - Bash(cat:*)
-  - Bash(jq:*)
-  - Bash(mv:*)
+allowed-tools: [Bash(mkdir:*), Bash(tee:*), Bash(chmod:*), Bash(which:*), Bash(echo:*), Bash(test:*), Bash(cat:*), Bash(jq:*), Bash(mv:*)]
 ---
 
 # Install Statusline

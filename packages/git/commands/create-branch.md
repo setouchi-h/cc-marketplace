@@ -1,14 +1,7 @@
 ---
 description: Create a new git-flow style branch (feature/bugfix/hotfix/release) based on the task description.
 argument-hint: "<task-description> [--base <branch>] [--no-push] [--type <type>]"
-allowed-tools:
-  - Bash(git status:*)
-  - Bash(git branch:*)
-  - Bash(git checkout:*)
-  - Bash(git switch:*)
-  - Bash(git rev-parse:*)
-  - Bash(git push:*)
-  - Bash(git fetch:*)
+allowed-tools: [Bash(git status:*), Bash(git branch:*), Bash(git checkout:*), Bash(git switch:*), Bash(git rev-parse:*), Bash(git push:*), Bash(git fetch:*), Bash(git ls-remote:*), Bash(git pull:*)]
 ---
 
 # Git-Flow Branch Creation
@@ -90,14 +83,21 @@ Analyze the task description to determine the branch type (if not forced with `-
 
 ### 4. Generate Branch Name
 
-Convert the task description into a valid branch name:
+Convert the task description into a valid, consistent branch name. Use the following deterministic sanitization rules so different implementations produce the same result:
 
-1. Extract key words (remove stopwords like "the", "a", "an", "and", "or", "but")
-2. Convert to lowercase
-3. Replace spaces and special characters with hyphens
-4. Remove consecutive hyphens
-5. Trim hyphens from start/end
-6. Limit to reasonable length (e.g., 50 chars max)
+1. Remove stopwords (English, minimal set): `the, a, an, and, or, but, for, to, with, in, on, at`.
+2. Convert to lowercase.
+3. Replace any character not `[a-z0-9-]` with a hyphen.
+   - Regex: `/[^a-z0-9-]+/g` → `-`
+4. Collapse multiple hyphens into one.
+   - Regex: `/-+/g` → `-`
+5. Trim leading/trailing hyphens.
+   - Regex: `/^-+|-+$/g` → ``
+6. Limit to a reasonable length (e.g., 50 chars max) after the above steps.
+
+Notes:
+- This list of stopwords is intentionally small and stable to avoid unexpected removals. Teams may extend it, but should document additions to keep behavior predictable.
+- Version-like strings (e.g., `v1.2.0`) will naturally become `v1-2-0` via step 3.
 
 **Format**: `<type>/<descriptive-name>`
 
@@ -106,6 +106,7 @@ Convert the task description into a valid branch name:
 - "Fix login page crash on mobile" → `bugfix/fix-login-page-crash-mobile`
 - "Hotfix security vulnerability in API" → `hotfix/security-vulnerability-api`
 - "Prepare v1.2.0 release" → `release/v1-2-0`
+- "Implement the new UI in the app" → `feature/implement-new-ui-app` ("the", "in" removed; punctuation normalized)
 
 ### 5. Check Branch Existence
 

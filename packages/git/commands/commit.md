@@ -1,15 +1,7 @@
 ---
 description: Analyze changes, create a git-flow style commit message, commit, and push to remote.
 argument-hint: "[--no-push] [--scope <scope>] [--type <type>]"
-allowed-tools:
-  - Bash(git status:*)
-  - Bash(git diff:*)
-  - Bash(git add:*)
-  - Bash(git commit:*)
-  - Bash(git push:*)
-  - Bash(git branch:*)
-  - Bash(git log:*)
-  - Bash(git rev-parse:*)
+allowed-tools: [Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git branch:*), Bash(git log:*), Bash(git rev-parse:*)]
 ---
 
 # Git Commit with Git-Flow Style
