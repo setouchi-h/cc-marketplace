@@ -22,10 +22,37 @@ Claude Code marketplace bundle with essential development plugins.
 ## Usage
 
 ### statusline
+
+The statusline plugin displays rich session information in your Claude Code prompt.
+
+**What it shows:**
+- 🌿 Current git branch
+- 🤖 AI model (e.g., Sonnet 4.5)
+- 💰 Session cost in USD
+- ⏱️ Duration (e.g., 1m49s)
+- 📝 Lines changed (+10/-2)
+- 💬 Optional quote (refreshed every 5 minutes)
+
+**Requirements:**
+- `jq` must be installed (for JSON parsing)
+- `curl` optional (for quotes feature)
+
+**Installation:**
 ```bash
-/statusline:install-statusline        # Install status line
-/statusline:preview-statusline        # Preview status line
+# Step 1: Install the plugin
+/plugin install statusline@cc-marketplace
+
+# Step 2: Run the installer
+/statusline:install-statusline
+
+# Optional: Install without quotes
+/statusline:install-statusline --no-quotes
+
+# Preview before full session
+/statusline:preview-statusline
 ```
+
+The installer creates `~/.claude/scripts/statusline.sh` and automatically configures your `~/.claude/settings.json`.
 
 ### gh
 ```bash
