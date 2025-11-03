@@ -9,6 +9,7 @@ Claude Code marketplace bundle with essential development plugins.
 - **statusline**: Rich status line showing branch, model, cost, duration, and changes
 - **gh**: Automated PR creation with intelligent analysis
 - **git**: Git-flow workflow automation (branch creation, conventional commits)
+- **xcode**: Build and run Xcode projects on simulators or physical devices
 
 ## Installation
 
@@ -17,6 +18,7 @@ Claude Code marketplace bundle with essential development plugins.
 /plugin install statusline@cc-marketplace
 /plugin install gh@cc-marketplace
 /plugin install git@cc-marketplace
+/plugin install xcode@cc-marketplace
 ```
 
 ## Usage
@@ -93,6 +95,29 @@ Git-flow workflow automation with branch creation and conventional commits.
 - `--type <type>`: Force commit type (feat/fix/docs/etc.)
 - `--scope <scope>`: Specify commit scope
 - `--no-push`: Don't push to remote
+
+### xcode
+
+Build and run Xcode projects on iOS simulators or physical devices.
+
+```bash
+/xcode:run                                           # Auto-detect and run
+/xcode:run --simulator "iPhone 15 Pro"               # Specific simulator
+/xcode:run --scheme MyApp --simulator "iPad Pro"     # Scheme + simulator
+/xcode:run --device "My iPhone"                      # Physical device
+/xcode:run --clean --configuration Release           # Clean Release build
+```
+
+**Flags:**
+- `--scheme <name>`: Specify build scheme (required if multiple exist)
+- `--simulator <name>`: Run on simulator (e.g., "iPhone 15 Pro")
+- `--device <name>`: Run on connected physical device
+- `--clean`: Perform clean build
+- `--configuration <config>`: Build configuration (Debug/Release, default: Debug)
+
+**Requirements:**
+- Xcode and command line tools must be installed
+- For physical devices, proper code signing configuration required
 
 ## License
 

@@ -9,6 +9,7 @@ Claude Code マーケットプレイスバンドル（開発必須プラグイ�
 - **statusline**: ブランチ・モデル・コスト・所要時間・変更を表示するステータスライン
 - **gh**: インテリジェントな PR 自動作成
 - **git**: Git-flow ワークフロー自動化（ブランチ作成、Conventional Commit）
+- **xcode**: Xcode プロジェクトをシミュレータまたは実機でビルド・実行
 
 ## インストール
 
@@ -17,6 +18,7 @@ Claude Code マーケットプレイスバンドル（開発必須プラグイ�
 /plugin install statusline@cc-marketplace
 /plugin install gh@cc-marketplace
 /plugin install git@cc-marketplace
+/plugin install xcode@cc-marketplace
 ```
 
 ## 使い方
@@ -93,6 +95,29 @@ Git-flow ワークフロー自動化（ブランチ作成と Conventional Commit
 - `--type <type>`: コミットタイプを強制（feat/fix/docs など）
 - `--scope <scope>`: コミットスコープを指定
 - `--no-push`: リモートへプッシュしない
+
+### xcode
+
+Xcode プロジェクトを iOS シミュレータまたは実機でビルド・実行。
+
+```bash
+/xcode:run                                           # 自動検出して実行
+/xcode:run --simulator "iPhone 15 Pro"               # 特定のシミュレータ
+/xcode:run --scheme MyApp --simulator "iPad Pro"     # スキーム + シミュレータ
+/xcode:run --device "My iPhone"                      # 実機
+/xcode:run --clean --configuration Release           # クリーン Release ビルド
+```
+
+**フラグ:**
+- `--scheme <name>`: ビルドスキームを指定（複数ある場合は必須）
+- `--simulator <name>`: シミュレータで実行（例: "iPhone 15 Pro"）
+- `--device <name>`: 接続された実機で実行
+- `--clean`: クリーンビルドを実行
+- `--configuration <config>`: ビルド構成（Debug/Release、デフォルト: Debug）
+
+**必要要件:**
+- Xcode とコマンドラインツールがインストールされていること
+- 実機の場合、適切なコード署名設定が必要
 
 ## ライセンス
 
