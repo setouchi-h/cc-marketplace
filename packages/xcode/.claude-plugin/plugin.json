@@ -1,0 +1,23 @@
+{
+  "name": "xcode",
+  "version": "1.0.0",
+  "description": "Build and run Xcode projects on simulators or physical devices from the command line.",
+  "author": {
+    "name": "Kazuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
+  },
+  "homepage": "https://github.com/setouchi-h/cc-marketplace",
+  "repository": "https://github.com/setouchi-h/cc-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "xcode",
+    "ios",
+    "simulator",
+    "build",
+    "run",
+    "xcodebuild"
+  ],
+  "commands": [
+    "./commands/run.md"
+  ]
+}

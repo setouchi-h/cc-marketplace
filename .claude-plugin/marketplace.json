@@ -56,6 +56,27 @@
         "automation"
       ],
       "category": "productivity"
+    },
+    {
+      "name": "xcode",
+      "source": "./packages/xcode",
+      "description": "Build and run Xcode projects on simulators or physical devices from the command line.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Kazuki Hashimoto"
+      },
+      "homepage": "https://github.com/setouchi-h/cc-marketplace",
+      "repository": "https://github.com/setouchi-h/cc-marketplace",
+      "license": "MIT",
+      "keywords": [
+        "xcode",
+        "ios",
+        "simulator",
+        "build",
+        "run",
+        "xcodebuild"
+      ],
+      "category": "productivity"
     }
   ]
 }
