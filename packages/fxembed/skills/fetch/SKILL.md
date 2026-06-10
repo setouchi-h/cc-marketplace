@@ -5,7 +5,6 @@ description: >
   access and scraping, so direct WebFetch / curl requests almost always fail.
   Always use this skill when a tweet URL (x.com, twitter.com, fxtwitter.com,
   fixupx.com) appears in the conversation and you need to read its content.
-allowed-tools: [Bash(curl:*), Bash(jq:*)]
 ---
 
 # Fetching X content via FxEmbed
