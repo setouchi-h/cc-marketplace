@@ -10,6 +10,7 @@ Claude Code marketplace bundle with essential development plugins.
 - **gh**: Automated PR creation with intelligent analysis
 - **git**: Git-flow workflow automation (branch creation, conventional commits)
 - **xcode**: Build and run Xcode projects on simulators or physical devices
+- **fxembed**: Fetch X (Twitter) tweets and profiles via the FxEmbed JSON API
 
 ## Installation
 
@@ -19,6 +20,7 @@ Claude Code marketplace bundle with essential development plugins.
 /plugin install gh@cc-marketplace
 /plugin install git@cc-marketplace
 /plugin install xcode@cc-marketplace
+/plugin install fxembed@cc-marketplace
 ```
 
 ## Usage
@@ -118,6 +120,29 @@ Build and run Xcode projects on iOS simulators or physical devices.
 **Requirements:**
 - Xcode and command line tools must be installed
 - For physical devices, proper code signing configuration required
+
+### fxembed
+
+Lets Claude read X (Twitter) content. X blocks unauthenticated access, so direct
+fetches of `x.com` links fail — this skill teaches Claude to rewrite tweet URLs
+to the [FxEmbed](https://github.com/FxEmbed/FxEmbed) JSON API
+(`api.fxtwitter.com`) and fetch them with curl. No slash command needed: once
+installed, the skill activates automatically whenever a tweet URL comes up.
+
+```
+https://x.com/user/status/123  →  https://api.fxtwitter.com/2/status/123
+```
+
+**What it covers:**
+- Tweet text, author, metrics, media links, quote tweets, and polls as JSON
+- User profiles (`/2/profile/{screen_name}`)
+- Search (`/2/search`) and user timelines (`/2/profile/{screen_name}/statuses`)
+- Direct media downloads via `d.fxtwitter.com`
+- Treating fetched content as untrusted data (prompt-injection guidance)
+- Fallback to vxTwitter when FxEmbed is down
+
+**Limitations:**
+- Public content only (protected accounts return 401, deleted tweets 404)
 
 ## License
 

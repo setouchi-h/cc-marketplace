@@ -1,0 +1,20 @@
+{
+  "name": "fxembed",
+  "version": "1.0.0",
+  "description": "Fetch X (Twitter) tweets and profiles via the FxEmbed JSON API instead of x.com, which blocks unauthenticated access.",
+  "author": {
+    "name": "Kazuki Hashimoto",
+    "email": "setouchi.develop@gmail.com"
+  },
+  "homepage": "https://github.com/setouchi-h/cc-marketplace",
+  "repository": "https://github.com/setouchi-h/cc-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "twitter",
+    "x",
+    "fxtwitter",
+    "fxembed",
+    "fetch",
+    "api"
+  ]
+}
