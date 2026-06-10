@@ -13,7 +13,7 @@
       "name": "gh",
       "source": "./packages/gh",
       "description": "Intelligent PR creation tool that analyzes your changes and creates well-structured pull requests.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "Kazuki Hashimoto"
       },
@@ -27,7 +27,7 @@
       "name": "statusline",
       "source": "./packages/statusline",
       "description": "Installs a shell status line for Claude Code showing branch, model, cost, duration, diff lines, and an optional quote.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "Kazuki Hashimoto"
       },
@@ -41,7 +41,7 @@
       "name": "git",
       "source": "./packages/git",
       "description": "Git workflow automation tool with git-flow style commit messages and automatic push.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "Kazuki Hashimoto"
       },
@@ -61,7 +61,7 @@
       "name": "xcode",
       "source": "./packages/xcode",
       "description": "Build and run Xcode projects on simulators or physical devices from the command line.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Kazuki Hashimoto"
       },
