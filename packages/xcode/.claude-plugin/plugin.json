@@ -1,6 +1,6 @@
 {
   "name": "xcode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build and run Xcode projects on simulators or physical devices from the command line.",
   "author": {
     "name": "Kazuki Hashimoto",
@@ -16,8 +16,5 @@
     "build",
     "run",
     "xcodebuild"
-  ],
-  "commands": [
-    "./commands/run.md"
   ]
 }
