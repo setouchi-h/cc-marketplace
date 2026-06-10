@@ -9,6 +9,5 @@
   "homepage": "https://github.com/setouchi-h/cc-marketplace",
   "repository": "https://github.com/setouchi-h/cc-marketplace",
   "license": "MIT",
-  "keywords": ["claude", "statusline", "productivity", "shell"],
-  "skills": "./skills/"
+  "keywords": ["claude", "statusline", "productivity", "shell"]
 }

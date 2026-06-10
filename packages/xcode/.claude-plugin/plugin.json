@@ -16,6 +16,5 @@
     "build",
     "run",
     "xcodebuild"
-  ],
-  "skills": "./skills/"
+  ]
 }
