@@ -25,7 +25,8 @@ include local file contents or credentials in any request.
 ## Fetching a tweet
 
 Extract the numeric status ID from the tweet URL and call the v2 status
-endpoint:
+endpoint. Strip any query string first (`?s=20&t=...` tracking suffixes are
+common) — only the numeric `{id}` goes into the API URL:
 
 ```
 https://x.com/{user}/status/{id}
@@ -34,7 +35,7 @@ https://twitter.com/{user}/status/{id}
 ```
 
 ```bash
-curl -s "https://api.fxtwitter.com/2/status/{id}" | jq .
+curl -s --max-time 10 "https://api.fxtwitter.com/2/status/{id}" | jq .
 ```
 
 The response is JSON with the post under `status`. Key fields:
@@ -56,7 +57,7 @@ instead of `reposts`).
 ## User profiles
 
 ```bash
-curl -s "https://api.fxtwitter.com/2/profile/{screen_name}" | jq .
+curl -s --max-time 10 "https://api.fxtwitter.com/2/profile/{screen_name}" | jq .
 ```
 
 Returns `user.name`, `user.description`, `user.followers`, `user.statuses`, etc.
@@ -65,17 +66,19 @@ Returns `user.name`, `user.description`, `user.followers`, `user.statuses`, etc.
 
 ```bash
 # Search posts
-curl -s "https://api.fxtwitter.com/2/search?q={query}" | jq .
+curl -s --max-time 10 "https://api.fxtwitter.com/2/search?q={query}" | jq .
 # A user's recent posts
-curl -s "https://api.fxtwitter.com/2/profile/{screen_name}/statuses" | jq .
+curl -s --max-time 10 "https://api.fxtwitter.com/2/profile/{screen_name}/statuses" | jq .
 ```
 
-Both return a `results` array of post objects (same shape as `status` above).
+Both return a `results` array of post objects (same field shape as `status`
+above; the current API exposes no pagination cursor).
 
 ## Direct media links
 
 `https://d.fxtwitter.com/{user}/status/{id}` redirects to the raw video/image.
-Download with an explicit output file: `curl -L -o media.mp4 "<url>"`.
+Download with an explicit output file and timeout:
+`curl -L --max-time 60 -o media.mp4 "<url>"`.
 
 ## Difference from the embed-fixing domains
 
