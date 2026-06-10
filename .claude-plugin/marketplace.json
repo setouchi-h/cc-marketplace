@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "A marketplace bundle for PR creation and management tools.",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "plugins": [
     {
@@ -72,6 +72,19 @@
         "run",
         "xcodebuild"
       ],
+      "category": "productivity"
+    },
+    {
+      "name": "fxembed",
+      "source": "./packages/fxembed",
+      "description": "Fetch X (Twitter) tweets and profiles via the FxEmbed JSON API instead of x.com, which blocks unauthenticated access.",
+      "author": {
+        "name": "Kazuki Hashimoto"
+      },
+      "homepage": "https://github.com/setouchi-h/cc-marketplace",
+      "repository": "https://github.com/setouchi-h/cc-marketplace",
+      "license": "MIT",
+      "keywords": ["twitter", "x", "fxtwitter", "fxembed", "scraping", "api"],
       "category": "productivity"
     }
   ]

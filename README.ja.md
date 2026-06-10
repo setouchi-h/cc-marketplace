@@ -10,6 +10,7 @@ Claude Code マーケットプレイスバンドル（開発必須プラグイ�
 - **gh**: インテリジェントな PR 自動作成
 - **git**: Git-flow ワークフロー自動化（ブランチ作成、Conventional Commit）
 - **xcode**: Xcode プロジェクトをシミュレータまたは実機でビルド・実行
+- **fxembed**: X (Twitter) のツイート・プロフィールを FxEmbed JSON API 経由で取得
 
 ## インストール
 
@@ -19,6 +20,7 @@ Claude Code マーケットプレイスバンドル（開発必須プラグイ�
 /plugin install gh@cc-marketplace
 /plugin install git@cc-marketplace
 /plugin install xcode@cc-marketplace
+/plugin install fxembed@cc-marketplace
 ```
 
 ## 使い方
@@ -118,6 +120,29 @@ Xcode プロジェクトを iOS シミュレータまたは実機でビルド・
 **必要要件:**
 - Xcode とコマンドラインツールがインストールされていること
 - 実機の場合、適切なコード署名設定が必要
+
+### fxembed
+
+Claude が X (Twitter) の内容を読めるようにします。X は未認証アクセスをブロックする
+ため `x.com` リンクの直接取得は失敗します。このスキルはツイート URL を
+[FxEmbed](https://github.com/FxEmbed/FxEmbed) の JSON API（`api.fxtwitter.com`）に
+書き換えて curl で取得する方法を Claude に教えます。スラッシュコマンドは不要で、
+インストール後はツイート URL が会話に出てくると自動的に発動します。
+
+```
+https://x.com/user/status/123  →  https://api.fxtwitter.com/2/status/123
+```
+
+**できること:**
+- ツイート本文・投稿者・メトリクス・メディアリンク・引用・アンケートを JSON で取得
+- ユーザープロフィール取得（`/2/profile/{screen_name}`）
+- 検索（`/2/search`）とユーザータイムライン（`/2/profile/{screen_name}/statuses`）
+- `d.fxtwitter.com` 経由のメディア直ダウンロード
+- 取得コンテンツを信頼しないデータとして扱う（プロンプトインジェクション対策の指針）
+- FxEmbed ダウン時の vxTwitter フォールバック
+
+**制限:**
+- 公開コンテンツのみ（鍵アカウントは 401、削除済みは 404）
 
 ## ライセンス
 
